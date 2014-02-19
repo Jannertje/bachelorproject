@@ -41,6 +41,9 @@ class Tree( object):
 
     return self.getParent().forest
 
+  def sum_of_leaves( self):
+    return sum( [node.value() for node in self.leaves()])
+
   def value( self, val = False):
     if val != False:
       self.__value = val
@@ -58,7 +61,6 @@ class Tree( object):
     if index in self.__extra_info:
       return self.__extra_info[index]
     else:
-      print index
       raise IndexError("index not set!")
       return False
 
@@ -86,11 +88,9 @@ class Tree_1D( Tree):
   def leaves( self):
     res = []
     for node in self.forest:
-      print "RECUSTION"
       res.extend( node.leaves())
 
     if len(res) == 0:
-      print "LEAF"
       res = [self]
 
     return res

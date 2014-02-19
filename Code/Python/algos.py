@@ -45,13 +45,18 @@ class Algo(object):
     return bests
 
   def iterate( self):
+    l = []
     for i in range(10):
       bests = self.iteration()
       self.plot()
+      l.append( self.tree.sum_of_leaves())
       if len(bests) == 0:
         break
       for leaf in bests:
         leaf.subdivide()
+
+    plt.plot( l)
+    plt.show()
 
 class Binev2004First( Algo):
   def __init__( self, f, s, t, a = 0, b = 1, d = 1):
@@ -87,7 +92,6 @@ class Binev2004First( Algo):
 
     #else: see (4.6) of Binev 2004
     if not node.getParent():
-      print "HOII"
       return node.extra_info_index( 'alpha', 0.)
 
     l = self.__lambda( node, d)
