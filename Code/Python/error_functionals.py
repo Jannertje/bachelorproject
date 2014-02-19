@@ -14,7 +14,7 @@ class Abstract(object):
     self.f = f
 
   """
-  Assigns an error to a node
+  Assigns an error to a node; return a list [error, extra_info]
   """
   @abstractmethod
   def error(self, node, d):
@@ -51,8 +51,9 @@ class TwoNorm( Abstract):
     p_n = lambda x: np.polyval(p_n_coeffs[::-1], x) #need to reverse order
 
     error = TwoNorm.norm_2( lambda x: self.f(x) - p_n(x), *node)
-    return error
+    #put the extra info in there
+    return error, {'poly': p_n}
 
 class Dummy(Abstract):
   def error(self, node, d = 1):
-    return 2.0
+    return 2.0, None

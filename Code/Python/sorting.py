@@ -1,4 +1,7 @@
 from abc import ABCMeta, abstractmethod
+import numpy as np
+import math
+
 class Abstract(object):
   __metaclass__ = ABCMeta
 
@@ -6,7 +9,7 @@ class Abstract(object):
   Adds a (node,value) pair to the sorting algorithm
   """
   @abstractmethod
-  def add(self, node, value):
+  def add(self, leaf):
     pass
 
   """
@@ -17,24 +20,41 @@ class Abstract(object):
     pass
 
 class Histogram(Abstract):
-  pass
+  def __init__( self):
+    self.bins = {}
+
+  def add( self, leaf):
+    def power_two(n):
+      return int( math.log( n, 2))
+    
+    p = power_two( leaf.value())
+    if p in self.bins:
+      self.bins[p].append( leaf)
+    else:
+      self.bins[p] = [leaf]
+
+  def find( self):
+    m = max( self.bins.keys(), key=int)
+    return self.bins[m]
 
 class Sort(Abstract):
   def __init__(self):
     self.values = []
 
-  def add(self, node, value):
-    self.values.append((node,value))
+  def add(self, leaf):
+    self.values.append( leaf)
 
   def find(self):
     bests = []
     highest = -1.0
     
-    for (node,value) in self.values:
+    for leaf in self.values:
+      value = leaf.value()
+      print value
       if value > highest:
-        bests = [(node,value)]
+        bests = [leaf]
         highest = value
       elif value == highest:
-        bests.append((node,value))
+        bests.append( leaf)
 
     return bests
