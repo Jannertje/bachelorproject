@@ -9,6 +9,7 @@ class Runner( object):
 
   def add( self, algo):
     self.insts.append( algo)
+    return algo
 
   def run( self, plot = False):
     for inst in self.insts:

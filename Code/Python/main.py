@@ -20,12 +20,14 @@ import sys
 f = lambda x: np.sqrt(x)*np.log(x/1.02)
 args = [1, 5, 1]
 
-g = Binev2004Second( f, s, *args)
-g.iterate( 5)
+runner = Runner(n=5)
+runner.add( Greedy          ( f, s, *args))
+g = runner.add( Binev2004Second( f, s, *args))
+runner.add( Binev2007       ( f, s, *args))
+runner.run( plot=True)
 
 t = TreeGrapher( [g.tree], 'fux.pdf')
 t.graph()
-
 
 sys.exit()
 runner = Runner(n=100)
