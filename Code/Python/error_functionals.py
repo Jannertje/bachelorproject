@@ -50,7 +50,7 @@ class TwoNorm( Abstract):
     p_n_coeffs = solve( M, b)
     p_n = lambda x: np.polyval(p_n_coeffs[::-1], x) #need to reverse order
 
-    error = TwoNorm.norm_2( lambda x: self.f(x) - p_n(x), *node)
+    error = TwoNorm.norm_2( lambda x: self.f(x) - p_n(x), *node) ** 2
     #put the extra info in there
     return error, {'poly': p_n}
 

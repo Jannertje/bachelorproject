@@ -15,6 +15,8 @@ class Algo(object):
 
     self.tree = t( -1., a, b)
 
+    self.error_list = []
+
   """
   Return the error of this node
   """
@@ -44,30 +46,52 @@ class Algo(object):
     bests = sorter.find()
     return bests
 
-  def iterate( self):
-    l = []
-    for i in range(10):
+  def iterate( self, n = False):
+    def run():
       bests = self.iteration()
-      self.plot()
-      l.append( self.tree.sum_of_leaves())
+      #self.plot()
+      current_error = self.tree.sum_of_leaves()
+      self.error_list.append( current_error)
       if len(bests) == 0:
-        break
+        return True
       for leaf in bests:
         leaf.subdivide()
 
-    plt.plot( l)
-    plt.show()
+      return False
 
-class Binev2004First( Algo):
-  def __init__( self, f, s, t, a = 0, b = 1, d = 1):
+    if n == False:
+      while True:
+        if run():
+          break
+    else:
+      for i in range(n):
+        if run():
+          break
+
+class Greedy(Algo):
+  def __init__(self, f, s, a = 0, b = 1, d = 1):
     self.d = d
-    self.t = t
     super(self.__class__, self).__init__(f, s, a, b)
 
     from error_functionals import TwoNorm
     self.errorClass = TwoNorm(self.f)
 
-  def __e( self, node, d):
+  def needsSubdivide( self, leaf):
+    return True
+
+  def error(self, node, d = False):
+    if d == False:
+      d = self.d
+    v = node.value(), node.extra_info()
+    if v[0] > -1.:
+      return v
+    return self.errorClass.error(node.boundary(), d)
+
+class Binev2004( Algo):
+  def needsSubdivide( self, leaf):
+    return True
+
+  def _e( self, node, d):
     if node.value() > - 1.:
       return node.value()
 
@@ -76,13 +100,26 @@ class Binev2004First( Algo):
     node.extra_info( dict( node.extra_info().items() + info.items()))
     return e
 
+  @abstractmethod
+  def error( self, node, d = False):
+    pass
+
+class Binev2004First( Binev2004):
+  def __init__( self, f, s, a = 0, b = 1, d = 1, t = 0.01):
+    self.d = d
+    self.t = t
+    super(self.__class__, self).__init__(f, s, a, b)
+
+    from error_functionals import TwoNorm
+    self.errorClass = TwoNorm(self.f)
+
   def __lambda( self, node, d):
     if 'lambda' in node.extra_info():
       return node.extra_info()['lambda']
 
     #else: see (4.2) of Binev 2004
-    sibling_errors = [self.__e( n, d) for n in node.siblings()]
-    l = self.__e( node, d)/sum( sibling_errors)
+    sibling_errors = [self._e( n, d) for n in node.siblings()]
+    l = self._e( node, d)/sum( sibling_errors)
     node.extra_info_index( 'lambda', l)
     return l
 
@@ -102,8 +139,8 @@ class Binev2004First( Algo):
   def __delta( self, node, d):
     #see (4.3) of Binev 2004
     def d():
-      children_errors = [self.__e( n, d) for n in node.forest]
-      return self.__e( node, d) - sum( children_errors)
+      children_errors = [self._e( n, d) for n in node.forest]
+      return self._e( node, d) - sum( children_errors)
 
     if 'delta' in node.extra_info():
       return node.extra_info()['delta']
@@ -126,24 +163,65 @@ class Binev2004First( Algo):
       return node.extra_info()['etilde'], {}
 
     return node.extra_info_index( 
-            'etilde', self.__e( node, d) - self.__alpha( node, d)
+            'etilde', self._e( node, d) - self.__alpha( node, d)
            ), {} #no extra info
 
-class Greedy(Algo):
-  def __init__(self, f, s, a = 0, b = 1, d = 1):
+class Binev2004Second( Binev2004):
+  def __init__( self, f, s, a=0, b=1, d=1):
     self.d = d
-    super(self.__class__, self).__init__(f, s, a, b)
+    super( self.__class__, self).__init__( f, s, a, b)
 
     from error_functionals import TwoNorm
-    self.errorClass = TwoNorm(self.f)
+    self.errorClass = TwoNorm( self.f)
 
-  def needsSubdivide( self, leaf):
-    return True
+  def __q( self, node, d):
+    if 'q' in node.extra_info():
+      return node.extra_info()['q']
 
-  def error(self, node, d = False):
+    #else: see (5.3) of Binev 2004
+    etilde, info = self.error( node, d)
+    children_errors = [self._e( n, d) for n in node.forest]
+    q = sum( children_errors)/( self._e( node, d) + etilde) * etilde
+    node.extra_info_index( 'q', q)
+    return q
+
+  def error( self, node, d = False):
     if d == False:
       d = self.d
-    v = node.value(), node.extra_info()
-    if v[0] > -1.:
-      return v
-    return self.errorClass.error(node.boundary(), d)
+    
+    if 'etilde' in node.extra_info():
+      return node.extra_info()['etilde'], {}
+
+    #see line above (5.2) of Binev 2004
+    if not node.getParent():
+      return node.extra_info_index( 'etilde', self._e( node, d)), {}
+
+    #see (5.2) of Binev 2004
+    return node.extra_info_index( 
+            'etilde', self.__q( node.getParent(), d)
+           ), {} #no extra info
+
+class Binev2007( Binev2004):
+  def __init__( self, f, s, a=0, b=1, d=1):
+    self.d = d
+    super( self.__class__, self).__init__( f, s, a, b)
+
+    from error_functionals import TwoNorm
+    self.errorClass = TwoNorm( self.f)
+
+  def error( self, node, d = False):
+    if d == False:
+      d = self.d
+    
+    if 'etilde' in node.extra_info():
+      return node.extra_info()['etilde'], {}
+
+    #see (4) of Binev 2007
+    if not node.getParent():
+      return node.extra_info_index( 'etilde', self._e( node, d)), {}
+
+    node_e = self._e( node, d)
+    parent_etilde, _ = self.error( node.getParent(), d)
+    return node.extra_info_index( 
+            'etilde', 1/( 1/node_e + 1/parent_etilde)
+           ), {} #no extra info

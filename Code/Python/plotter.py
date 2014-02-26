@@ -12,3 +12,9 @@ def plottree( tree):
   for leaf in tree.leaves():
     if 'poly' in leaf.extra_info():
       plotfunc( leaf.extra_info()['poly'], *leaf.boundary())
+
+def plotlists( lists, legends, yscale = 'log'):
+  for l in lists:
+    plt.plot( l)
+  plt.legend( legends)
+  plt.yscale( yscale)

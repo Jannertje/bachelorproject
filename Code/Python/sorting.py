@@ -50,7 +50,6 @@ class Sort(Abstract):
     
     for leaf in self.values:
       value = leaf.value()
-      print value
       if value > highest:
         bests = [leaf]
         highest = value
