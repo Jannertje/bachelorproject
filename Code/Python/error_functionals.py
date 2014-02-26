@@ -52,7 +52,7 @@ class TwoNorm( Abstract):
 
     error = TwoNorm.norm_2( lambda x: self.f(x) - p_n(x), *node) ** 2
     #put the extra info in there
-    return error, {'poly': p_n}
+    return error, {'poly': p_n_coeffs}
 
 class Dummy(Abstract):
   def error(self, node, d = 1):

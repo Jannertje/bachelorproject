@@ -26,11 +26,43 @@ class Tree( object):
           except TypeError:
             raise TypeError("Type not supported!")
 
+  def isLeaf( self, tree = None):
+    if tree == None:
+      tree = self
+    return len(tree.forest) == 0
+
+  def height( self, tree = None):
+    if tree == None:
+      tree = self
+
+    if tree.isLeaf():
+      return 0
+    else:
+      return 1 + max( [n.height() for n in tree.forest])
+
+  def depth( self, tree = None):
+    if tree == None:
+      tree = self
+
+    if tree.hasParent():
+      return 1 + tree.getParent().depth()
+    else:
+      return 0
+
+  def root( self):
+    if self.hasParent():
+      return self.getParent().root()
+    else:
+      return self
+
   def setParent( self, par):
     if par:
       self.__parent = par
 
     return self
+
+  def hasParent( self):
+    return self.getParent() != None
 
   def getParent( self):
     return self.__parent
