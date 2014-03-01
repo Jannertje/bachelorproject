@@ -18,7 +18,7 @@ import sys
 #sys.settrace(tracefunc)
 
 f = lambda x: np.sqrt(x)*np.log(x/1.02)
-args = [1, 5, 1]
+args = [0, 1, 1]
 
 runner = Runner(n=5)
 runner.add( Greedy          ( f, s, *args))

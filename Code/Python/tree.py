@@ -40,6 +40,30 @@ class Tree( object):
     else:
       return 1 + max( [n.height() for n in tree.forest])
 
+  #return the branches in a fine-to-coarse manner
+  def branches( self):
+    if self.isLeaf():
+      return []
+
+    lst = [self]
+    for n in self.forest:
+      lst.extend( n.branches())
+
+    return lst.reverse()
+
+  #finds the node with boundary (a,b) as
+  def node( self, a, b):
+    a2, b2 = self.boundary()
+    if (a, b) == (a2, b2):
+      return self
+
+    for n in self.forest:
+      ret = n.node( a, b)
+      if ret:
+        return ret
+
+    return False
+
   def depth( self, tree = None):
     if tree == None:
       tree = self
@@ -105,18 +129,6 @@ class Tree( object):
   def boundary( self):
     return [self.a, self.b]
 
-  @abstractmethod
-  def leaves( self):
-    pass
-
-  @abstractmethod
-  def subdivide( self):
-    pass
-      
-
-class Tree_1D( Tree):
-  K = 2
-
   def leaves( self):
     res = []
     for node in self.forest:
@@ -126,6 +138,15 @@ class Tree_1D( Tree):
       res = [self]
 
     return res
+
+
+  @abstractmethod
+  def subdivide( self):
+    pass
+      
+
+class Tree_1D( Tree):
+  K = 2
 
   def subdivide( self):
     if len(self.forest) > 0:
@@ -139,3 +160,40 @@ class Tree_1D( Tree):
                     self.__class__( -1., h, b, parent = self) ]
 
     return self.forest
+
+class Tree_1D_hp( Tree_1D):
+  def copy_from( self, tree):
+    self.__dict__.update( tree.__dict__)
+    self.__value = {}
+    self.__p = -1
+    for i, n in self.forest:
+      p = Tree_1D_hp( {}, *self.forest[i].boundary())
+      p.copy_from( self.forest[i])
+      self.forest[i] = p
+
+  #value is now a list
+  def value( self, val = False, p = False):
+    if val == False and p == False:
+      return self.__value
+
+    if val != False and p == False:
+      if isinstance( val, list):
+        self.__value = val
+      else:
+        raise TypeError("Value is not a list!")
+
+    if val == False and p != False:
+      if p in self.__value:
+        return self.__value[p]
+      else:
+        raise TypeError("Value for p not set!")
+
+    if val != False and p != False:
+      self.__value[p] = val
+      return val
+
+  def p( self, val = False):
+    if val != False:
+      self.__p = val
+
+    return self.__p
