@@ -1,12 +1,27 @@
 import pygraphviz as gpv
 import pprint
+from tree import *
+import os
+
+def unique_file(file_name):
+  counter = 1
+  file_name_parts = os.path.splitext(file_name) # returns ('/path/file', '.ext')
+  while 1:
+    try:
+      fd = os.open(file_name, os.O_CREAT | os.O_EXCL | os.O_RDWR)
+      return file_name
+    except OSError:
+      pass
+    file_name = file_name_parts[0] + '_' + str(counter) + file_name_parts[1]
+    counter += 1
 
 class TreeGrapher( object):
-  def __init__( self, forest, outfile, debug = True):
+  def __init__( self, forest, outfile, debug = True, unique = True):
     self.forest = forest
     self.G = gpv.AGraph( directed=True)
     self.outfile = outfile
     self.debug = debug
+    self.unique = unique
 
   def set_leaf( self, node):
     n = self.G.get_node( node)
@@ -14,7 +29,7 @@ class TreeGrapher( object):
 
   def t( self, tree):
     if tree.hasParent():
-      return tree.getParent().forest.index(tree)
+      return tree.getParent().forest.index(tree) + 2 * self.t( tree.getParent())
     else:
       return 0
 
@@ -26,7 +41,7 @@ class TreeGrapher( object):
     t, n = [0, 2**tree.depth()] #teller, noemer
 
     if tree.hasParent():
-      t = self.t( tree) + 2 * self.t( tree.getParent())
+      t = self.t( tree)
 
     strings = ["",""]
     if a != 0.:
@@ -35,17 +50,19 @@ class TreeGrapher( object):
     if b != 1.:
       strings[0] = "".join( [strings[0], "%s * " % str( b)])
       strings[1] = "".join( [strings[1], "%s * " % str( b)])
-    string = " [ %s%i/%i, %s%i/%i ] \n %s" % ( 
+    string = " [ %s%i/%i, %s%i/%i ]" % ( 
       strings[0], 
       t, 
       n, 
       strings[1], 
       t+1, 
       n, 
-      tree.value()
     )
-    if self.debug:
-      string = "".join( [string, "\n%s" % pprint.pformat(tree.extra_info(), width=1)])
+    if tree.isLeaf():
+      if isinstance( tree, Tree_hp):
+        string = "".join( [string, "\np=%d" % tree.p()])
+      if self.debug:
+        string = "".join( [string, "\ne=%s\n%s" % (tree.value(), pprint.pformat(tree.extra_info(), width=1))])
 
     return string
 
@@ -61,11 +78,14 @@ class TreeGrapher( object):
         self.__recursiveGraph( n, parent = tree)
 
   def graph( self):
-    self.G.add_edge( "boundaries\nerror value\nextra_info", "leaf")
-    self.set_leaf( "leaf")
+    #self.G.add_edge( "boundaries\nerror value\nextra_info", "leaf")
+    #self.set_leaf( "leaf")
     for tree in self.forest:
       self.__recursiveGraph( tree, parent = None)
 
     self.G.graph_attr.update(size="10,100")
     self.G.layout( prog = 'dot')
-    self.G.draw( self.outfile)
+    if self.unique:
+      self.G.draw( unique_file( self.outfile))
+    else:
+      self.G.draw( self.outfile)

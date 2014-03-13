@@ -11,10 +11,8 @@ def plotfunc( f, a, b = False):
 def plottree( tree):
   for leaf in tree.leaves():
     if 'poly' in leaf.extra_info():
-      plotfunc( 
-                lambda x: np.polyval( leaf.extra_info()['poly'][::-1]), 
-                *leaf.boundary()
-              )
+      p = leaf.extra_info_index('poly')
+      plotfunc( lambda x: np.polyval( p[::-1], x), *leaf.boundary())
 
 def plotlists( lists, legends, yscale = 'log'):
   for l in lists:

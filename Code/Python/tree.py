@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import numpy as np
 
 class Tree( object):
   __metaclass__ = ABCMeta
@@ -26,6 +27,15 @@ class Tree( object):
           except TypeError:
             raise TypeError("Type not supported!")
 
+  def hasSameBoundary( self, node):
+    return np.allclose( self.boundary(), node.boundary())
+
+  def transformTo( self, class_):
+    assert( issubclass( class_, Tree))
+    self.__class__ = class_
+    for n in self.forest:
+      n.transformTo( class_)
+
   def isLeaf( self, tree = None):
     if tree == None:
       tree = self
@@ -40,6 +50,9 @@ class Tree( object):
     else:
       return 1 + max( [n.height() for n in tree.forest])
 
+  def trim( self):
+    self.forest = []
+
   #return the branches in a fine-to-coarse manner
   def branches( self):
     if self.isLeaf():
@@ -49,12 +62,12 @@ class Tree( object):
     for n in self.forest:
       lst.extend( n.branches())
 
-    return lst.reverse()
+    return reversed( lst)
 
   #finds the node with boundary (a,b) as
   def node( self, a, b):
     a2, b2 = self.boundary()
-    if (a, b) == (a2, b2):
+    if np.allclose( [a, b], [a2, b2]):
       return self
 
     for n in self.forest:
@@ -118,6 +131,7 @@ class Tree( object):
       return self.__extra_info[index]
     else:
       raise IndexError("index not set!")
+      print "WTF BRUH"
       return False
 
   def extra_info( self, info = None):
@@ -161,39 +175,15 @@ class Tree_1D( Tree):
 
     return self.forest
 
-class Tree_1D_hp( Tree_1D):
-  def copy_from( self, tree):
-    self.__dict__.update( tree.__dict__)
-    self.__value = {}
-    self.__p = -1
-    for i, n in self.forest:
-      p = Tree_1D_hp( {}, *self.forest[i].boundary())
-      p.copy_from( self.forest[i])
-      self.forest[i] = p
-
-  #value is now a list
-  def value( self, val = False, p = False):
-    if val == False and p == False:
-      return self.__value
-
-    if val != False and p == False:
-      if isinstance( val, list):
-        self.__value = val
-      else:
-        raise TypeError("Value is not a list!")
-
-    if val == False and p != False:
-      if p in self.__value:
-        return self.__value[p]
-      else:
-        raise TypeError("Value for p not set!")
-
-    if val != False and p != False:
-      self.__value[p] = val
-      return val
+class Tree_hp( Tree):
+  _p = -1
 
   def p( self, val = False):
     if val != False:
-      self.__p = val
+      print "p set to", val
+      self._p = val
 
-    return self.__p
+    return self._p
+
+class Tree_1D_hp( Tree_hp, Tree_1D):
+  pass

@@ -1,8 +1,11 @@
 from abc import ABCMeta, abstractmethod
 from tree import Tree_1D as t
-from tree import Tree_1D_hp as t_hp
+from tree import Tree_1D_hp
 from plotter import plottree, plotfunc
 import matplotlib.pyplot as plt
+from copy import deepcopy
+import numpy as np
+from grapher import TreeGrapher
 
 class Algo(object):
   __metaclass__ = ABCMeta
@@ -88,7 +91,7 @@ class Greedy(Algo):
       return v
     return self.errorClass.error(node.boundary(), d)
 
-class Binev2004( Algo):
+class Binev( Algo):
   def needsSubdivide( self, leaf):
     return True
 
@@ -105,7 +108,7 @@ class Binev2004( Algo):
   def error( self, node, d = False):
     pass
 
-class Binev2004First( Binev2004):
+class Binev2004First( Binev):
   def __init__( self, f, s, a = 0, b = 1, d = 1, t = 0.01):
     self.d = d
     self.t = t
@@ -167,7 +170,7 @@ class Binev2004First( Binev2004):
             'etilde', self._e( node, d) - self.__alpha( node, d)
            ), {} #no extra info
 
-class Binev2004Second( Binev2004):
+class Binev2004Second( Binev):
   def __init__( self, f, s, a=0, b=1, d=1):
     self.d = d
     super( self.__class__, self).__init__( f, s, a, b)
@@ -202,7 +205,7 @@ class Binev2004Second( Binev2004):
             'etilde', self.__q( node.getParent(), d)
            ), {} #no extra info
 
-class Binev2007( Binev2004):
+class Binev2007( Binev):
   def __init__( self, f, s, a=0, b=1, d=1):
     self.d = d
     super( self.__class__, self).__init__( f, s, a, b)
@@ -227,50 +230,85 @@ class Binev2007( Binev2004):
             'etilde', 1/( 1/node_e + 1/parent_etilde)
            ), {} #no extra info
 
-class Binev2013( Algo):
+class Binev2013( Binev):
   def __init__( self, f, s, a=0, b=1):
     self.f = f
     self.s = s
     self.tree = t( -1, a, b)
-    self.tree_hp = t_hp( {}, a, b)
+    self.tree_hp = Tree_1D_hp( -1, a, b)
+    self.error_list = []
 
     from error_functionals import TwoNorm
     self.errorClass = TwoNorm( self.f)
 
-  def interation( self):
+  def iteration( self):
     sorter = self.s()
+
+    T = deepcopy( self.tree)
+    for n in self.tree.leaves():
+      self.__etilde( n, self.__etilde_h( n))
+
+    b = T.branches()
+    for n in b:
+      p = self._p( n)
+      e_p, info = self._e_p( n)
+      E_hp = self._E_hp( n, T)
+      print p, e_p, E_hp
+      if e_p < E_hp:
+        n.value( e_p)
+        n.extra_info( dict( n.extra_info().items() + info.items()))
+        n.trim()
+        for l in self.tree.leaves():
+          self.__etilde( l, self.__etilde( l) * e_p/E_hp)
+
+    self.tree_hp = self._T_hp( T)
+    sorter.add( self.tree.leaves())
+
+    bests = sorter.find()
+    return bests
 
   #halfway Binev 2013 page 15
   def _p( self, node):
-    return len( node.leaves())
+    n = self.tree.node( *node.boundary())
+    return len( n.leaves())
 
   def _T_hp( self, tree):
-    if tree.root() != self.tree.root():
-      raise Error("Illegal operation! Roots do not coincide")
+    if not tree.root().hasSameBoundary( self.tree.root()):
+      raise StandardError("Illegal operation! Roots do not coincide")
       return False
 
-    T_hp = t_hp( {}, *self.tree.boundary())
-    T_hp.copy_from( self.tree)
-    if tree.isLeaf():
-      T_hp.node( *tree.boundary()).p( 1)
-      return T_hp
+    T_hp = deepcopy( tree)
+    T_hp.transformTo( Tree_1D_hp)
 
     for l in tree.leaves():
       T_hp.node( *l.boundary()).p( self._p( l))
-      return T_hp
 
-  def _E_hp( self, node, tree):
-    pass
+    return T_hp
 
-  def _e_p( self, node, p):
-    v = node.value()
-    if p in v:
-      return v[p]
+  #TODO: improve this
+  def _E_hp( self, node, T):
+    leaves = self.tree.leaves()
+    for node in T.leaves():
+      isleaf = False
+      for leaf in leaves:
+        if np.allclose( node.boundary(), leaf.boundary()):
+          isleaf = True
+          break
+      if not isleaf and node in leaves:
+        leaves.remove( node)
 
+    #leaves is now sanitized
+    s = 0.0
+    for n in leaves:
+      e, i = self._e_p( n)
+      s = s + e
+    return s
+
+  def _e_p( self, node):
+    p = self._p( node)
     e, info = self.errorClass.error( node.boundary(), p)
-    node.value( e, p)
-    node.extra_info( dict( node.extra_info().items() + info.items()))
-    return e
+
+    return e, info
 
   def __etilde_h( self, node):
     e1 = self._e( node, 1)
@@ -281,5 +319,14 @@ class Binev2013( Algo):
     #see Binev 2013 page 15
     return 1/(1/e1 + 1/self.__etilde_h( node.getParent()))
 
-  def error( self, node, d):
-    return 0.
+  def __etilde( self, node, val = False):
+    return node.extra_info_index( 'etilde', val)
+
+  def error( self, node, d = False):
+    if d != False:
+      raise TypeError("Argument invalid!")
+      return False
+    return self.__etilde( node), {}
+
+  def needsSubdivide( self, leaf):
+    return True

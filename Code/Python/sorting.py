@@ -24,14 +24,18 @@ class Histogram(Abstract):
     self.bins = {}
 
   def add( self, leaf):
-    def power_two(n):
-      return int( math.log( n, 2))
-    
-    p = power_two( leaf.value())
-    if p in self.bins:
-      self.bins[p].append( leaf)
+    if isinstance( leaf, list):
+      for l in leaf:
+        self.add( l)
     else:
-      self.bins[p] = [leaf]
+      def power_two(n):
+        return int( math.log( n, 2))
+      
+      p = power_two( leaf.value())
+      if p in self.bins:
+        self.bins[p].append( leaf)
+      else:
+        self.bins[p] = [leaf]
 
   def find( self):
     m = max( self.bins.keys(), key=int)
@@ -42,7 +46,11 @@ class Sort(Abstract):
     self.values = []
 
   def add(self, leaf):
-    self.values.append( leaf)
+    if isinstance( leaf, list):
+      for l in leaf:
+        self.add( l)
+    else:
+      self.values.append( leaf)
 
   def find(self):
     bests = []
