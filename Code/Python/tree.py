@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
+from collections import deque
 
 class Tree( object):
   __metaclass__ = ABCMeta
@@ -7,6 +8,7 @@ class Tree( object):
 
   def __init__( self, value, a, b, forest = None, parent = None, extra_info = None):
     self.__value = value
+    self.__error = -1
     self.__extra_info = {}
     self.__parent = parent
     self.a = a
@@ -54,13 +56,17 @@ class Tree( object):
     self.forest = []
 
   #return the branches in a fine-to-coarse manner
+  #reversed breadth-first
+  #TODO: this returns the whole tree. see C implementation.
   def branches( self):
-    if self.isLeaf():
-      return []
-
-    lst = [self]
-    for n in self.forest:
-      lst.extend( n.branches())
+    lst = []
+    q = deque([])
+    q.append( self)
+    while q:
+      n = q.popleft()
+      lst.append( n)
+      for l in n.forest:
+        q.append( l)
 
     return reversed( lst)
 
@@ -111,7 +117,13 @@ class Tree( object):
     return self.getParent().forest
 
   def sum_of_leaves( self):
-    return sum( [node.value() for node in self.leaves()])
+    return sum( [node.error() for node in self.leaves()])
+
+  def error( self, val = False):
+    if val != False:
+      self.__error = val
+
+    return self.__value
 
   def value( self, val = False):
     if val != False:
@@ -155,25 +167,33 @@ class Tree( object):
 
 
   @abstractmethod
-  def subdivide( self):
+  def subdivide( self, node):
     pass
       
 
 class Tree_1D( Tree):
   K = 2
 
-  def subdivide( self):
-    if len(self.forest) > 0:
+  def subdivide( self, node = False):
+    if node == False:
+      node = self
+    else:
+      node = self.node( node.a, node.b)
+      if node == False:
+        raise IndexError("node not found in current tree!")
+        return False
+
+    if len(node.forest) > 0:
       print "subdividing non-leaf...beware"
     
-    a = self.a
-    b = self.b
+    a = node.a
+    b = node.b
     h = (a+b)/2.0
 
-    self.forest = [ self.__class__( -1., a, h, parent = self),
-                    self.__class__( -1., h, b, parent = self) ]
+    node.forest = [ node.__class__( -1., a, h, parent = node),
+                    node.__class__( -1., h, b, parent = node) ]
 
-    return self.forest
+    return node.forest
 
 class Tree_hp( Tree):
   _p = -1

@@ -22,11 +22,21 @@ class Algo(object):
     self.error_list = []
 
   """
-  Return the error of this node
+  Return the true of this node
   """
   @abstractmethod
   def error(self, node, d):
     pass
+
+  """
+  Return the (possibly modified) error of this node
+  """
+  @abstractmethod
+  def value(self, node, d):
+    pass
+
+  def current_error( self):
+    return self.tree.sum_of_leaves()
 
   @abstractmethod
   def needsSubdivide( self, leaf):
@@ -36,13 +46,14 @@ class Algo(object):
     plotfunc( self.f, *self.tree.boundary())
     plottree( self.tree)
     plt.show()
+    TreeGrapher( [self.tree], 'tree.pdf', unique = False, debug = False).graph()
 
   def iteration( self):
     sorter = self.s()
 
     for leaf in self.tree.leaves():
       if self.needsSubdivide( leaf):
-        error, info = self.error( leaf)
+        error, info = self.value( leaf)
         leaf.value( error)
         leaf.extra_info( dict( leaf.extra_info().items() + info.items()))
         sorter.add( leaf)
@@ -53,8 +64,8 @@ class Algo(object):
   def iterate( self, n = False):
     def run():
       bests = self.iteration()
-      #self.plot()
-      current_error = self.tree.sum_of_leaves()
+      self.plot()
+      current_error = self.current_error()
       self.error_list.append( current_error)
       if len(bests) == 0:
         return True
@@ -77,13 +88,13 @@ class Greedy(Algo):
     self.d = d
     super(self.__class__, self).__init__(f, s, a, b)
 
-    from error_functionals import TwoNorm
-    self.errorClass = TwoNorm(self.f)
+    from error_functionals import TwoNormOrth
+    self.errorClass = TwoNormOrth(self.f)
 
   def needsSubdivide( self, leaf):
     return True
 
-  def error(self, node, d = False):
+  def value(self, node, d = False):
     if d == False:
       d = self.d
     v = node.value(), node.extra_info()
@@ -91,21 +102,20 @@ class Greedy(Algo):
       return v
     return self.errorClass.error(node.boundary(), d)
 
+  def error( self, node, d = False):
+    return self.value( node, d)
+
 class Binev( Algo):
   def needsSubdivide( self, leaf):
     return True
 
-  def _e( self, node, d):
-    if node.value() > - 1.:
-      return node.value()
-
+  def error( self, node, d = False):
     e, info = self.errorClass.error( node.boundary(), d)
-    node.value( e)
+    node.error( e)
     node.extra_info( dict( node.extra_info().items() + info.items()))
     return e
 
-  @abstractmethod
-  def error( self, node, d = False):
+  def value( self, node, d = False):
     pass
 
 class Binev2004First( Binev):
@@ -114,16 +124,16 @@ class Binev2004First( Binev):
     self.t = t
     super(self.__class__, self).__init__(f, s, a, b)
 
-    from error_functionals import TwoNorm
-    self.errorClass = TwoNorm(self.f)
+    from error_functionals import TwoNormOrth
+    self.errorClass = TwoNormOrth(self.f)
 
   def __lambda( self, node, d):
     if 'lambda' in node.extra_info():
       return node.extra_info()['lambda']
 
     #else: see (4.2) of Binev 2004
-    sibling_errors = [self._e( n, d) for n in node.siblings()]
-    l = self._e( node, d)/sum( sibling_errors)
+    sibling_errors = [self.error( n, d) for n in node.siblings()]
+    l = self.error( node, d)/sum( sibling_errors)
     node.extra_info_index( 'lambda', l)
     return l
 
@@ -143,8 +153,8 @@ class Binev2004First( Binev):
   def __delta( self, node, d):
     #see (4.3) of Binev 2004
     def d():
-      children_errors = [self._e( n, d) for n in node.forest]
-      return self._e( node, d) - sum( children_errors)
+      children_errors = [self.error( n, d) for n in node.forest]
+      return self.error( node, d) - sum( children_errors)
 
     if 'delta' in node.extra_info():
       return node.extra_info()['delta']
@@ -157,9 +167,9 @@ class Binev2004First( Binev):
       return node.extra_info_index( 'delta', self.t - _d)
 
   def needsSubdivide( self, leaf):
-    return self.error( leaf)[0] > self.t
+    return self.value( leaf)[0] > self.t
 
-  def error( self, node, d = False):
+  def value( self, node, d = False):
     if d == False:
       d = self.d
     
@@ -167,7 +177,7 @@ class Binev2004First( Binev):
       return node.extra_info()['etilde'], {}
 
     return node.extra_info_index( 
-            'etilde', self._e( node, d) - self.__alpha( node, d)
+            'etilde', self.error( node, d) - self.__alpha( node, d)
            ), {} #no extra info
 
 class Binev2004Second( Binev):
@@ -175,21 +185,21 @@ class Binev2004Second( Binev):
     self.d = d
     super( self.__class__, self).__init__( f, s, a, b)
 
-    from error_functionals import TwoNorm
-    self.errorClass = TwoNorm( self.f)
+    from error_functionals import TwoNormOrth
+    self.errorClass = TwoNormOrth( self.f)
 
   def __q( self, node, d):
     if 'q' in node.extra_info():
       return node.extra_info()['q']
 
     #else: see (5.3) of Binev 2004
-    etilde, info = self.error( node, d)
-    children_errors = [self._e( n, d) for n in node.forest]
-    q = sum( children_errors)/( self._e( node, d) + etilde) * etilde
+    etilde, info = self.value( node, d)
+    children_errors = [self.error( n, d) for n in node.forest]
+    q = sum( children_errors)/( self.error( node, d) + etilde) * etilde
     node.extra_info_index( 'q', q)
     return q
 
-  def error( self, node, d = False):
+  def value( self, node, d = False):
     if d == False:
       d = self.d
     
@@ -198,7 +208,7 @@ class Binev2004Second( Binev):
 
     #see line above (5.2) of Binev 2004
     if not node.getParent():
-      return node.extra_info_index( 'etilde', self._e( node, d)), {}
+      return node.extra_info_index( 'etilde', self.error( node, d)), {}
 
     #see (5.2) of Binev 2004
     return node.extra_info_index( 
@@ -210,10 +220,10 @@ class Binev2007( Binev):
     self.d = d
     super( self.__class__, self).__init__( f, s, a, b)
 
-    from error_functionals import TwoNorm
-    self.errorClass = TwoNorm( self.f)
+    from error_functionals import TwoNormOrth
+    self.errorClass = TwoNormOrth( self.f)
 
-  def error( self, node, d = False):
+  def value( self, node, d = False):
     if d == False:
       d = self.d
     
@@ -222,10 +232,10 @@ class Binev2007( Binev):
 
     #see (4) of Binev 2007
     if not node.getParent():
-      return node.extra_info_index( 'etilde', self._e( node, d)), {}
+      return node.extra_info_index( 'etilde', self.error( node, d)), {}
 
-    node_e = self._e( node, d)
-    parent_etilde, _ = self.error( node.getParent(), d)
+    node_e = self.error( node, d)
+    parent_etilde, _ = self.value( node.getParent(), d)
     return node.extra_info_index( 
             'etilde', 1/( 1/node_e + 1/parent_etilde)
            ), {} #no extra info
@@ -238,8 +248,14 @@ class Binev2013( Binev):
     self.tree_hp = Tree_1D_hp( -1, a, b)
     self.error_list = []
 
-    from error_functionals import TwoNorm
-    self.errorClass = TwoNorm( self.f)
+    from error_functionals import TwoNormOrth
+    self.errorClass = TwoNormOrth( self.f)
+
+  def plot( self):
+    plotfunc( self.f, *self.tree.boundary())
+    plottree( self.tree_hp)
+    plt.show()
+    TreeGrapher( [self.tree_hp], 'tree_hp.pdf', unique = False, debug = True).graph()
 
   def iteration( self):
     sorter = self.s()
@@ -253,12 +269,11 @@ class Binev2013( Binev):
       p = self._p( n)
       e_p, info = self._e_p( n)
       E_hp = self._E_hp( n, T)
-      print p, e_p, E_hp
       if e_p < E_hp:
-        n.value( e_p)
+        n.error( e_p)
         n.extra_info( dict( n.extra_info().items() + info.items()))
         n.trim()
-        for l in self.tree.leaves():
+        for l in self.tree.node(*n.boundary()).leaves():
           self.__etilde( l, self.__etilde( l) * e_p/E_hp)
 
     self.tree_hp = self._T_hp( T)
@@ -311,7 +326,7 @@ class Binev2013( Binev):
     return e, info
 
   def __etilde_h( self, node):
-    e1 = self._e( node, 1)
+    e1 = self.error( node, 1)
 
     if not node.hasParent():
       return e1
@@ -320,13 +335,18 @@ class Binev2013( Binev):
     return 1/(1/e1 + 1/self.__etilde_h( node.getParent()))
 
   def __etilde( self, node, val = False):
+    if val != False:
+      node.value( val)
     return node.extra_info_index( 'etilde', val)
 
-  def error( self, node, d = False):
+  def value( self, node, d = False):
     if d != False:
       raise TypeError("Argument invalid!")
       return False
     return self.__etilde( node), {}
+
+  def current_error( self):
+    return self.tree_hp.sum_of_leaves()
 
   def needsSubdivide( self, leaf):
     return True

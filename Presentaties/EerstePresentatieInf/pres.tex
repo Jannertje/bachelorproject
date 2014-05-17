@@ -1,0 +1,225 @@
+\documentclass{beamer}
+\mode<presentation>
+\usepackage{amsmath,amssymb}
+\usepackage{color}
+\usepackage{etoolbox}
+\usepackage[dutch]{babel}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usetheme{Rochester}
+\usecolortheme{beaver}
+\setbeamertemplate{footline}{\insertframenumber/\inserttotalframenumber}
+
+%\setbeamercolor{normal text}{bg=black,fg=white}
+%\setbeamercolor{frametitle}{bg=black,fg=white}
+%\setbeamercolor{alerted text}{bg=black,fg=white}
+%\setbeamercolor{title}{bg=black,fg=white}
+%\setbeamercolor{stelling}{bg=black,fg=white}
+
+\title{Adaptieve benaderingsmethodes}
+\author{Jan Westerdiep}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\A}{\mathbb{A}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\f}{\varphi}
+\newcommand{\e}{\varepsilon}
+\renewcommand{\d}{\delta}
+
+\newtheorem{bewijs}{Bewijs}
+\newtheorem{voorbeeld}{Voorbeeld}
+\newtheorem{stelling}{Stelling}
+\newtheorem{definitie}{Definitie}
+\newtheorem{gevolg}{Gevolg}
+\newtheorem{opmerking}{Opmerking}
+
+\setbeamerfont{block title}{size=\small}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Wat?}
+\begin{itemize}
+  \item \alert<3>{Adaptieve} \alert<2>{benaderingsmethodes} \pause
+  \item Functies benaderen \pause
+  \item Door te kijken \emph{waar} de functie moeilijk is en daar in te zoomen \pause
+  \item Dit alles aan de hand van twee artikelen van Peter Binev \pause
+\end{itemize}
+\end{frame}
+
+\begin{frame}{2004 -- Iets preciezer}
+\begin{columns}[t]
+\begin{column}[T]{\linewidth - 2.5cm}
+\begin{itemize}
+  \item Pak $f: [a,b] \to \R$ met een opdeling van het domein en laat $n \in \N$ vast
+  \uncover<2->{\item Op elk stukje, best benaderende polynoom van graad $n$}
+  \uncover<3->{\item \emph{Kies} stukje om op te delen}
+  \uncover<4->{\item Herhaal}
+  \uncover<5->{\item[$\Rightarrow$] Tree Generating Algorithm}
+\end{itemize}
+\end{column}
+\begin{column}[T]{2.5cm}
+  \centering
+  \includegraphics[width=\linewidth]{schets_0.png}\\
+  \uncover<2->{\includegraphics[width=\linewidth]{schets_1.png}\\}
+  \uncover<3->{\includegraphics[width=\linewidth]{schets_2.png}\\}
+  \uncover<4->{\includegraphics[width=\linewidth]{schets_3.png}\\}
+\end{column}
+\end{columns}
+\centering
+  \uncover<5->{\includegraphics[width=0.8\linewidth]{lol.pdf}}
+\end{frame}
+
+\begin{frame}{Enkel door midden hakken}
+  \centering
+  \only<1>{\includegraphics[height=0.5\textheight]{41.png}\\
+  \includegraphics[height=0.5\textheight]{tree.pdf}}
+  \only<2>{\includegraphics[height=0.5\textheight]{42.png}\\
+  \includegraphics[height=0.5\textheight]{tree_1.pdf}}
+  \only<3>{\includegraphics[height=0.5\textheight]{43.png}\\
+  \includegraphics[height=0.5\textheight]{tree_2.pdf}}
+  \only<4>{\includegraphics[height=0.5\textheight]{44.png}\\
+  \includegraphics[height=0.5\textheight]{tree_3.pdf}}
+  \only<5>{\includegraphics[height=0.5\textheight]{45.png}\\
+  \includegraphics[height=0.5\textheight]{tree_4.pdf}}
+  \only<6>{\includegraphics[height=0.5\textheight]{46.png}\\
+  \includegraphics[height=0.5\textheight]{tree_5.pdf}}
+  \only<7>{\includegraphics[height=0.5\textheight]{47.png}\\
+  \includegraphics[height=0.5\textheight]{tree_6.pdf}}
+  \only<8>{\includegraphics[height=0.5\textheight]{48.png}\\
+  \includegraphics[height=0.5\textheight]{tree_7.pdf}}
+\end{frame}
+
+\begin{frame}{2004 -- Iets preciezer}
+  \begin{itemize}
+    \item Bewijsbaar: Binev-2004 maakt een boom die na $n$ opdelingen
+      \begin{itemize}
+        \item gevonden is in $\mathcal{O}(n)$, en
+        \item beter is dan de optimale boom in $n/2$ opdelingen
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{2013 -- Iets preciezer}
+\begin{columns}[t]
+\begin{column}[T]{\linewidth - 2.5cm}
+\begin{itemize}
+  \item Pak $f: [a,b] \to \R$ met een opdeling van het domein
+  \uncover<2->{\item Op elk stukje, best benaderende polynoom van bepaalde graad}
+  \uncover<3->{\item \emph{Kies} stukje om op te delen}
+  \uncover<5->{\item[$\Rightarrow$] \emph{Of} verhoog de graad van het polynoom}
+  \uncover<4->{\item Herhaal}
+\end{itemize}
+\end{column}
+\begin{column}[T]{2.5cm}
+  \centering
+  \includegraphics[width=\linewidth]{schets_0.png}\\
+  \uncover<2->{\includegraphics[width=\linewidth]{schets_1.png}\\}
+  \uncover<3->{\includegraphics[width=\linewidth]{schets_2.png}\\}
+  \uncover<4->{\includegraphics[width=\linewidth]{schets_3.png}\\}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Ook polynomiale graad verhogen}
+  \centering
+  \only<1>{\includegraphics[height=0.5\textheight]{31.png}\\
+  \includegraphics[height=0.5\textheight]{tree_hp_1.pdf}}
+  \only<2>{\includegraphics[height=0.5\textheight]{32.png}\\
+  \includegraphics[height=0.5\textheight]{tree_hp_2.pdf}}
+  \only<3>{\includegraphics[height=0.5\textheight]{33.png}\\
+  \includegraphics[height=0.5\textheight]{tree_hp_3.pdf}}
+  \only<4>{\includegraphics[height=0.5\textheight]{34.png}\\
+  \includegraphics[height=0.5\textheight]{tree_hp_4.pdf}}
+  \only<5>{\includegraphics[height=0.5\textheight]{35.png}\\
+  \includegraphics[height=0.5\textheight]{tree_hp_5.pdf}}
+  \only<6>{\includegraphics[height=0.5\textheight]{36.png}\\
+  \includegraphics[height=0.5\textheight]{tree_hp_6.pdf}}
+  \only<7>{\includegraphics[height=0.5\textheight]{37.png}\\
+  \includegraphics[height=0.5\textheight]{tree_hp_7.pdf}}
+  \only<8>{\includegraphics[height=0.5\textheight]{38.png}\\
+  \includegraphics[height=0.5\textheight]{tree_hp_8.pdf}}
+\end{frame}
+
+\begin{frame}{Ander voorbeeld}
+  \centering
+  \only<1>{\includegraphics[width=0.5\linewidth]{11.png}
+  \includegraphics[width=0.5\linewidth]{21.png}}
+  \only<2>{\includegraphics[width=0.5\linewidth]{12.png}
+  \includegraphics[width=0.5\linewidth]{22.png}}
+  \only<3>{\vspace{-1em}\includegraphics[width=0.5\linewidth]{14.png}
+  \includegraphics[width=0.5\linewidth]{24.png}}
+  \only<4>{\vspace{-1em}\includegraphics[width=0.5\linewidth]{18.png}
+  \includegraphics[width=0.5\linewidth]{28.png}}
+\end{frame}
+
+\begin{frame}{Bij wie?}
+  \begin{columns}[t]
+    \begin{column}[T]{\linewidth - 6cm}
+      Rob Stevenson
+      \begin{itemize}
+        \item Wiskunde -- Theorie
+      \end{itemize}
+      ~~\\
+      \uncover<2>{
+        Dick van Albada
+        \begin{itemize}
+          \item Informatica -- Praktijk
+        \end{itemize}
+      }
+    \end{column}
+    \begin{column}[T]{3cm}
+      \uncover<2>{
+        \includegraphics[width=2.5cm]{Albada.jpg}
+      }
+    \end{column}
+    \begin{column}[T]{3cm}
+      \includegraphics[width=2.5cm]{Stevenson.jpg}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Waarom?}
+  \begin{itemize}
+    \item Wiskunde op de computer: goede samenkomst wiskunde/informatica \pause
+    \item Spiksplinternieuw (2013) \pause
+    \item Vraagstelling is makkelijk, de theorie erachter niet \pause
+    \item Veel uitbreiding en toepassing mogelijk
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Wanneer?}
+  \begin{itemize}
+    \item Februari, maart, april: Theorie begrijpen, implementatie in Python \pause
+    \item Mei: Implementatie in C \pause
+    \item Daarna: High Performance, parallelliseren, toepassen
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Jan Westerdiep -- Adaptieve benaderingsmethodes}
+  \centering
+  \includegraphics[width=0.4\linewidth]{42.png}
+  \includegraphics[width=0.4\linewidth]{48.png}\\
+  \includegraphics[width=0.4\linewidth]{32.png}
+  \includegraphics[width=0.4\linewidth]{38.png}\\
+\end{frame}
+
+\begin{frame}{Schets van inhoudsopgave}
+  \begin{enumerate}
+    \item 1-dimensionale geval \pause
+    \item 2-dimensionale geval \pause
+    \item Implementatie in C \pause
+    \item Parallelliseren \pause
+    \item Implementatie in e.o.a.~parallelle situatie (GPU, supercomputer) \pause
+    \item (wellicht) Uitbreiding en toepassing
+  \end{enumerate}
+\end{frame}
+
+\end{document}

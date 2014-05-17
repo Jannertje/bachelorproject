@@ -16,7 +16,7 @@ def unique_file(file_name):
     counter += 1
 
 class TreeGrapher( object):
-  def __init__( self, forest, outfile, debug = True, unique = True):
+  def __init__( self, forest, outfile, debug = False, unique = False):
     self.forest = forest
     self.G = gpv.AGraph( directed=True)
     self.outfile = outfile
@@ -62,7 +62,7 @@ class TreeGrapher( object):
       if isinstance( tree, Tree_hp):
         string = "".join( [string, "\np=%d" % tree.p()])
       if self.debug:
-        string = "".join( [string, "\ne=%s\n%s" % (tree.value(), pprint.pformat(tree.extra_info(), width=1))])
+        string = "".join( [string, "\ne=%s\n%s" % (tree.error(), pprint.pformat(tree.extra_info(), width=1))])
 
     return string
 

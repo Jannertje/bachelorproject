@@ -9,10 +9,15 @@ def plotfunc( f, a, b = False):
   plt.plot(X, [f(x) for x in X])
 
 def plottree( tree):
+  def islambda( v):
+    return isinstance(v, type(lambda: None)) and v.__name__ == '<lambda>'
   for leaf in tree.leaves():
     if 'poly' in leaf.extra_info():
       p = leaf.extra_info_index('poly')
-      plotfunc( lambda x: np.polyval( p[::-1], x), *leaf.boundary())
+      if islambda( p):
+        plotfunc( p, *leaf.boundary())
+      else:
+        plotfunc( lambda x: np.polyval( p[::-1], x), *leaf.boundary())
 
 def plotlists( lists, legends, yscale = 'log'):
   for l in lists:
