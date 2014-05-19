@@ -77,7 +77,8 @@ double leg_sum( double *coeffs, boundary b, int r, double x) {
   double leg_res[r];
   gsl_sf_legendre_Pl_array( r-1, ab2m11( b, x), leg_res);
   double res = 0.0;
-  for( int l = 0; l < r; l++) {
+  int l;
+  for( l = 0; l < r; l++) {
     res += coeffs[l] * leg_res[l];
   }
 
@@ -106,7 +107,8 @@ double error_2norm( function f, boundary b, int r) {
   //printf("Finding error on [%g,%g] with degrees of freedom %i\n", b.a, b.b, r);
   assert( r > 0);
   double coeffs[r];
-  for( int l = 0; l < r; l++) {
+  int l;
+  for( l = 0; l < r; l++) {
     coeffs[l] = _gamma( f, b, l);
   }
 

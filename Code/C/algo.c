@@ -296,7 +296,8 @@ tree *algo_binev2013( algo_info *i, int n) {
   } else if( n == 0) {
     Thp = binev2013_generate_Thp( TN, TN);
   } else {
-    for( int j = 0; j < n; j++) {
+    int j;
+    for( j = 0; j < n; j++) {
       printf("Iteration %i\n", j);
       if( Thp != NULL) {
         tree_free_subtree( Thp);
@@ -383,7 +384,8 @@ tree *runner( algo_type algo, algo_info *i, int r, int n) {
       j++;
     }
   } else {
-    for( int j = 0; j < n; j++) {
+    int j;
+    for( j = 0; j < n; j++) {
       printf("Iteration %i:\n", j);
       if( iterator( errorfun, i, r, &t)) {
         break;

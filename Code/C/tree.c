@@ -79,7 +79,8 @@ tree *htree_create( boundary b,
 
 void printer( tree *self, int indent) {
   if( self == NULL) return;
-  for( int i = 0; i < indent; i++) {
+  int i;
+  for( i = 0; i < indent; i++) {
     printf("  ");
   }
   printf("%p:[%g,%g]", self, self->b.a, self->b.b);
