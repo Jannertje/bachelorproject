@@ -11,11 +11,24 @@ typedef struct error_info {
   double real_error;
 } error_info;
 
+typedef struct htree {
+  error_info e;
+} htree;
+
+typedef struct hptree {
+  error_info e;
+  int r;
+} hptree;
+
 typedef struct tree {
   boundary b;
   struct tree **forest;
   struct tree *parent;
-  error_info e;
+  union t {
+    htree *h;
+    hptree *hp;
+  } t;
+  int is_hp;
 } tree;
 
 typedef struct tree_list {

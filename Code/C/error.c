@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <gsl/gsl_sf_legendre.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_errno.h>
 #include <math.h>
 #include <string.h>
 #include <assert.h>
@@ -47,14 +48,23 @@ double _gamma( function f, boundary b, int l) {
   struct leg_mul_s params = { f, b, l };
   gsl_function F;
   double teller, err;
-  size_t neval;
 
   F.function = &leg_mul;
   F.params = &params;
 
-  gsl_integration_qng( &F, b.a, b.b, 
-                       ERR, 0.0, &teller, &err, &neval);
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc( 1000);
+  int status = gsl_integration_qags( &F, b.a, b.b, ERR, 0.0, 1000, w, &teller, &err);
+  gsl_integration_workspace_free( w);
+  /*
+  size_t neval;
+  int status = gsl_integration_qng( &F, b.a, b.b, ERR, 0.0, &teller, &err, &neval);
+  */
+  if( status) {
+    printf("hioihoi %g %i %i\n", err, status, GSL_EDIVERGE);
+    exit(-1);
+  }
   double noemer = (b.b-b.a)/(2*l + 1);
+  printf("gamma_%i[%g,%g] = %g\n", l, b.a, b.b, teller/noemer);
   return teller/noemer;
 }
 
@@ -93,7 +103,7 @@ double approx_quad( double x, void *params) {
  */
 double error_2norm( function f, boundary b, int r) {
   //find best polynomial
-  printf("Finding error on [%g,%g] with degrees of freedom %i\n", b.a, b.b, r);
+  //printf("Finding error on [%g,%g] with degrees of freedom %i\n", b.a, b.b, r);
   assert( r > 0);
   double coeffs[r];
   for( int l = 0; l < r; l++) {
@@ -104,11 +114,20 @@ double error_2norm( function f, boundary b, int r) {
   struct approx_quad_s params = { f, coeffs, b, r };
   gsl_function F;
   double res, err;
-  size_t neval;
 
   F.function = &approx_quad;
   F.params = &params;
 
-  gsl_integration_qng( &F, b.a, b.b, ERR, 0.0, &res, &err, &neval);
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc( 1000);
+  int status = gsl_integration_qags( &F, b.a, b.b, ERR, 0.0, 1000, w, &res, &err);
+  gsl_integration_workspace_free( w);
+  /*
+  size_t neval;
+  int status = gsl_integration_qng( &F, b.a, b.b, ERR, 0.0, &res, &err, &neval);
+  */
+  if( status) {
+    printf("hioihoi2\n");
+    exit(-1);
+  }
   return res;
 }

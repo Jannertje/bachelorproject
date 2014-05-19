@@ -6,5 +6,6 @@
 tree *algo_greedy( algo_info *info, int r, int n);
 tree *algo_binev2004( algo_info *info, int r, int n);
 tree *algo_binev2007( algo_info *info, int r, int n);
+tree *algo_binev2013( algo_info *info, int n);
 
 #endif

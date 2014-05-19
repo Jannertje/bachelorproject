@@ -7,10 +7,34 @@
 #include "macros.h"
 #include "tree.h"
 
+/*
+ * Returns a value in {-1,0,1} in accorance with strcmp
+ */
+int boundary_compare( boundary b1, boundary b2) {
+  if( b1.a < b2.a) return -1;
+  if( b1.a > b2.a) return 1;
+  if( b1.b < b2.b) return -1;
+  if( b1.b > b2.b) return 1;
+  return 0;
+}
+
+tree *copier( tree *self, tree *parent) {
+  if( self == NULL) return NULL;
+  assert( !self->is_hp);
+  tree *new;
+  new = htree_create( self->b, NULL, NULL, parent, self->t.h->e);
+  new->forest[0] = copier( self->forest[0], new);
+  new->forest[1] = copier( self->forest[1], new);
+  return new;
+}
+
+tree *htree_copy( tree *self) {
+  return copier( self, NULL);
+}
+
 tree *tree_create( boundary b,
                    tree *left, tree *right, 
-                   tree *parent,
-                   error_info e) {
+                   tree *parent) {
 
   assert( b.a < b.b); //[a,b] is a proper interval
   assert( left != NULL || right == NULL); //left == NULL => right == NULL
@@ -19,11 +43,37 @@ tree *tree_create( boundary b,
   new->b = b;
   new->forest = malloc( 2 * sizeof( tree));
   new->parent = parent;
-  new->e = e;
 
   new->forest[0] = left;
   new->forest[1] = right;
   
+  return new;
+}
+
+tree *hptree_create( boundary b,
+                   tree *left, tree *right, 
+                   tree *parent,
+                   error_info e,
+                   int r) {
+  
+  tree *new = tree_create( b, left, right, parent);
+
+  new->is_hp = 1;
+  new->t.hp = malloc( sizeof( hptree));
+  new->t.hp->e = e;
+  return new;
+}
+
+tree *htree_create( boundary b,
+                   tree *left, tree *right, 
+                   tree *parent,
+                   error_info e) {
+  
+  tree *new = tree_create( b, left, right, parent);
+
+  new->is_hp = 0;
+  new->t.h = malloc( sizeof( htree));
+  new->t.h->e = e;
   return new;
 }
 
@@ -32,9 +82,13 @@ void printer( tree *self, int indent) {
   for( int i = 0; i < indent; i++) {
     printf("  ");
   }
-  printf("[%g,%g]", self->b.a, self->b.b);
+  printf("%p:[%g,%g]", self, self->b.a, self->b.b);
   if( tree_is_leaf( self)) {
-    printf(" (%g)\n", self->e.real_error);
+    if( !self->is_hp) {
+      printf(" (%g)\n", htree_error_info( self).real_error);
+    } else {
+      printf(" (%g, %i)\n", hptree_error_info( self).real_error, hptree_r( self));
+    }
   } else {
     printf("\n");
     printer( self->forest[0], indent + 1);
@@ -56,10 +110,42 @@ int tree_subdivide( tree *self) {
   boundary right = {h, b};
   error_info e = {-1.0, -1.0};
 
-  self->forest[0] = tree_create( left, NULL, NULL, self, e);
-  self->forest[1] = tree_create( right, NULL, NULL, self, e);
+  if( !self->is_hp) {
+    self->forest[0] = htree_create( left, NULL, NULL, self, e);
+    self->forest[1] = htree_create( right, NULL, NULL, self, e);
+  }
 
   return 0;
+}
+
+int tree_num_leaves( tree *self) {
+  if( tree_is_leaf( self)) {
+    return 1;
+  } else {
+    int num0 = tree_num_leaves( self->forest[0]);
+    int num1 = tree_num_leaves( self->forest[1]);
+    return num0 + num1;
+  }
+}
+
+/*
+ * TODO: of course there are multiple traversals possible. choose the best for the job?
+ */
+tree_list *tree_nodes( tree *self) {
+  tree_list *list = tree_list_create( self);
+  if( tree_is_leaf( self)) {
+    return list;
+  } else {
+    tree_list *list0 = tree_nodes( self->forest[0]);
+    tree_list *list1 = tree_nodes( self->forest[0]);
+    tree_list *cur = list0;
+    while( cur->next != NULL) {
+      cur = cur->next;
+    }
+    cur->next = list1;
+    list->next = list0;
+    return list;
+  }
 }
 
 tree_list *tree_leaves( tree *self) {
@@ -136,12 +222,72 @@ tree **tree_siblings( tree *self) {
   return self->parent->forest;
 }
 
+error_info htree_error_info( tree *self) {
+  assert( !self->is_hp);
+  return self->t.h->e;
+}
+
+error_info hptree_error_info( tree *self) {
+  assert( self->is_hp);
+  return self->t.hp->e;
+}
+
+error_info tree_error_info( tree *self) {
+  if( self->is_hp) {
+    return hptree_error_info( self);
+  } else {
+    return htree_error_info( self);
+  }
+}
+
+int hptree_r( tree *self) {
+  assert( self->is_hp);
+  return self->t.hp->r;
+}
+
+tree *tree_find_node( tree *node, tree *self) {
+  //pre-order traverse for the moment. TODO
+  if( boundary_compare( self->b, node->b) == 0) {
+    return self;
+  }
+  if( tree_is_leaf( self)) {
+    return NULL;
+  }
+  tree *left = tree_find_node( node, self->forest[0]);
+  if( left != NULL) {
+    return left;
+  }
+  return tree_find_node( node, self->forest[1]);
+}
+
+int htree_r_node( tree *node, tree *TN, tree **node_in_TN) {
+  assert( !node->is_hp);
+  *node_in_TN = tree_find_node( node, TN);
+  assert( *node_in_TN != NULL);
+  return tree_num_leaves( *node_in_TN);
+}
+
+void tree_trim_subtree( tree *self) {
+  if( !tree_is_leaf( self)) {
+    tree_free_subtree( self->forest[0]);
+    tree_free_subtree( self->forest[1]);
+  }
+
+  self->forest[0] = NULL;
+  self->forest[1] = NULL;
+}
+
 void tree_free_subtree( tree *self) {
   if( !tree_is_leaf( self)) {
     tree_free_subtree( self->forest[0]);
     tree_free_subtree( self->forest[1]);
   }
 
+  if( self->is_hp) {
+    free( self->t.hp);
+  } else {
+    free( self->t.h);
+  }
   free( self->forest);
   free( self);
 }
@@ -180,6 +326,16 @@ tree *tree_list_popleft( tree_list **list) {
   free( tmp);
 
   return node;
+}
+
+tree *tree_list_find_node( tree *node, tree_list *list) {
+  while( list != NULL) {
+    if( boundary_compare( list->node->b, node->b) == 0) {
+      return list->node;
+    }
+    list = list->next;
+  }
+  return NULL;
 }
 
 void tree_list_print( tree_list *list) {

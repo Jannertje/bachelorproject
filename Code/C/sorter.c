@@ -13,8 +13,10 @@ int sorter_bins( tree_list *leaves, tree_list **bests) {
   int bin = INT_MIN; //highest bin (= power of 2) so far
   tree_list *cur = leaves;
   while( cur != NULL) {
-    assert( cur->node->e.error >= 0.0);
-    int curbin = bins_next_pow2( cur->node->e.error);
+    int curbin;
+    error_info e = tree_error_info( cur->node);
+    assert( e.error >= 0.0);
+    curbin = bins_next_pow2( e.error);
     if( curbin > bin) {
       tree_list_free( *bests);
       *bests = tree_list_create( cur->node);
@@ -34,7 +36,7 @@ int sorter_sort( tree_list *leaves, tree_list **bests) {
   double best_error = -1.0;
   tree_list *cur = leaves;
   while( cur != NULL) {
-    double error = cur->node->e.error;
+    double error = tree_error_info( cur->node).error;
     assert( error >= 0.0);
 
     if( error > best_error) {

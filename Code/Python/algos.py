@@ -301,6 +301,7 @@ class Binev2013( Binev):
     return T_hp
 
   #TODO: improve this
+  #TODO: definition of node is shadowed by local var? is this even the correct definition?
   def _E_hp( self, node, T):
     leaves = self.tree.leaves()
     for node in T.leaves():

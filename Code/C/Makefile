@@ -15,4 +15,4 @@ clean:
 	rm -rf *.dSYM
 
 valgrind: main
-	valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes --dsymutil=yes ./main 
+	valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes --dsymutil=yes ./main -a binev2013 -n 17

@@ -3,15 +3,23 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <gsl/gsl_errno.h>
 
 #include "tree.h"
 #include "error.h"
 #include "sorter.h"
 #include "algo.h"
 
-boundary b = {0.0, 10.0};
+boundary b = {-1.0, 1.0};
 double f( double x) {
-  return erfc( x);
+  /*
+  if( x < 0) {
+    return x;
+  } else {
+    return x*x;
+  }
+  */
+  return sin(x);
 }
 
 void run( void) {
@@ -21,13 +29,16 @@ void run( void) {
 }
 
 void showUsage( char *argv0) {
-  printf("Usage: %s [-s bins|hist] [-e 2norm] [-r #>0] [-n #] [-a greedy|binev2004|binev2007]", argv0);
+  printf("Usage: %s [-s bins|hist] [-e 2norm] [-r #>0] [-n #] [-a greedy|binev2004|binev2007|binev2013]", argv0);
 }
 
 int main( int argc, char **argv) {
-  tree *( *algo)( algo_info *, int, int) = algo_binev2007;
+  gsl_set_error_handler_off();
+
+  tree *( *algo)() = algo_binev2007;
   int r = 1, n = 4;
   algo_info i = { &f, b, &sorter_sort, &error_2norm};
+  int is_hp = 0;
 
   int c;
   while( (c = getopt( argc, argv, "s:e:r:n:a:")) != -1) {
@@ -67,6 +78,9 @@ int main( int argc, char **argv) {
           algo = algo_binev2004;
         } else if( strcmp( optarg, "binev2007") == 0) {
           algo = algo_binev2007;
+        } else if( strcmp( optarg, "binev2013") == 0) {
+          algo = algo_binev2013;
+          is_hp = 1;
         } else {
           printf("Unknown argument %s for option -a.\n", optarg);
           showUsage( argv[0]);
@@ -80,7 +94,12 @@ int main( int argc, char **argv) {
     }
   }
 
-  tree *tree = algo( &i, r, n);
-  tree_free_subtree( tree);
+  if( !is_hp) {
+    tree *tree = algo( &i, r, n);
+    tree_free_subtree( tree);
+  } else {
+    tree *tree = algo( &i, n);
+    tree_free_subtree( tree);
+  }
   return 0;
 }
