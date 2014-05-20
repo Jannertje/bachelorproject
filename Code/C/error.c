@@ -39,6 +39,108 @@ boundary leg_node( boundary b, location l) {
   return res;
 }
 
+int leg_Pl_e(const int l, const double x, gsl_sf_result * result) {
+  //printf("%i %g %lu\n", l, x, *( long *) &x);
+  if(l < 0 || x < -1.0 || x > 1.0) {
+    GSL_ERROR ("domain error", GSL_EDOM);
+  }
+  else if(l == 0) {
+    result->val = 1.0;
+    result->err = 0.0;
+    return GSL_SUCCESS;
+  }
+  else if(l == 1) {
+    result->val = x;
+    result->err = 0.0;
+    return GSL_SUCCESS;
+  }
+  else if(l == 2) {
+    result->val = 0.5 * (3.0*x*x - 1.0);
+    result->err = GSL_DBL_EPSILON * (fabs(3.0*x*x) + 1.0);
+    return GSL_SUCCESS;
+  }
+  else if(x == 1.0) {
+    result->val = 1.0;
+    result->err = 0.0;
+    return GSL_SUCCESS;
+  }
+  else if(x == -1.0) {
+    result->val = ( GSL_IS_ODD(l) ? -1.0 : 1.0 );
+    result->err = 0.0;
+    return GSL_SUCCESS;
+  }
+  else if(l < 100000) {
+    /* upward recurrence: l P_l = (2l-1) z P_{l-1} - (l-1) P_{l-2} */
+
+    double p_ellm2 = 1.0; /* P_0(x) */
+    double p_ellm1 = x; /* P_1(x) */
+    double p_ell = p_ellm1;
+
+    double e_ellm2 = GSL_DBL_EPSILON;
+    double e_ellm1 = fabs(x)*GSL_DBL_EPSILON;
+    double e_ell = e_ellm1;
+
+    int ell;
+
+    for(ell=2; ell <= l; ell++){
+      p_ell = (x*(2*ell-1)*p_ellm1 - (ell-1)*p_ellm2) / ell;
+      p_ellm2 = p_ellm1;
+      p_ellm1 = p_ell;
+
+      e_ell = 0.5*(fabs(x)*(2*ell-1.0) * e_ellm1 + (ell-1.0)*e_ellm2)/ell;
+      e_ellm2 = e_ellm1;
+      e_ellm1 = e_ell;
+    }
+    result->val = p_ell;
+    result->err = e_ell + l*fabs(p_ell)*GSL_DBL_EPSILON;
+    return GSL_SUCCESS;
+  } else {
+    GSL_ERROR ("polynomial degree too high", GSL_EDOM);
+  }
+}
+
+int leg_Pl_array(const int lmax, const double x, double * result_array) {
+  /* CHECK_POINTER(result_array) */
+
+  /*
+  for( int i = 0; i <= lmax; i++) {
+    printf("%i %g %lu\n", i, x, *( long *) &x);
+  }
+  */
+  if(lmax < 0 || x < -1.0 || x > 1.0) {
+    GSL_ERROR ("domain error", GSL_EDOM);
+  }
+  else if(lmax == 0) {
+    result_array[0] = 1.0;
+    return GSL_SUCCESS;
+  }
+  else if(lmax == 1) {
+    result_array[0] = 1.0;
+    result_array[1] = x;
+    return GSL_SUCCESS;
+  }
+  else {
+    /* upward recurrence: l P_l = (2l-1) z P_{l-1} - (l-1) P_{l-2} */
+
+    double p_ellm2 = 1.0; /* P_0(x) */
+    double p_ellm1 = x; /* P_1(x) */
+    double p_ell = p_ellm1;
+    int ell;
+
+    result_array[0] = 1.0;
+    result_array[1] = x;
+
+    for(ell=2; ell <= lmax; ell++){
+      p_ell = (x*(2*ell-1)*p_ellm1 - (ell-1)*p_ellm2) / ell;
+      p_ellm2 = p_ellm1;
+      p_ellm1 = p_ell;
+      result_array[ell] = p_ell;
+    }
+
+    return GSL_SUCCESS;
+  }
+}
+
 /* Given position x and degrees of freedom r, find p_r(x).
  * \[
  *   p_r(x) = \gamma_0 P_0(x) + \ldots + \gamma_{r-1} P_{r-1}(x).
@@ -46,7 +148,7 @@ boundary leg_node( boundary b, location l) {
  */
 double leg_sum( double *coeffs, boundary int_bounds, int r, double x) {
   double leg_res[r];
-  gsl_sf_legendre_Pl_array( r-1, leg_ab2m11( int_bounds, x), leg_res);
+  leg_Pl_array( r-1, leg_ab2m11( int_bounds, x), leg_res);
   double res = 0.0;
   int n;
   for( n = 0; n < r; n++) {
@@ -72,15 +174,16 @@ double leg_approx_quad( double x, void *params) {
  */
 double leg_mul( double x, void *params) {
   struct leg_mul_s *p = (struct leg_mul_s *) params;
-  return (p->f)(x) * gsl_sf_legendre_Pl( p->n, leg_ab2m11( p->int_bounds, x));
+  gsl_sf_result res;
+  leg_Pl_e( p->n, leg_ab2m11( p->int_bounds, x), &res);
+  return (p->f)(x) * res.val;
 }
 
 /*
- * \gamma_l := \int_a^b f(x) P_l(x) dx / \int_a^b P_l^2(x) dx
- * My OSX cries about gamma as a function name, so name it _gamma.
+ * \gamma_r := \int_a^b f(x) P_l(x) dx / \int_a^b P_r^2(x) dx
  */
-double leg_gamma( function f, boundary int_bounds, location l, int n) {
-  struct leg_mul_s params = { f, int_bounds, n };
+double leg_gamma( function f, boundary int_bounds, location l, int r) {
+  struct leg_mul_s params = { .f = f, .int_bounds = int_bounds, .n = r };
   gsl_function F;
   double res, err;
 
@@ -98,9 +201,57 @@ double leg_gamma( function f, boundary int_bounds, location l, int n) {
     printf("hioihoi %g %i %i\n", err, status, GSL_EDIVERGE);
     exit(-1);
   }
-  double noemer = (int_bounds.b - int_bounds.a)/(2*n + 1);
-  //printf("gamma_%i(%i,%i) = %g\n", n, l.i, l.n, res/noemer);
+  double noemer = (int_bounds.b - int_bounds.a)/(2*r + 1);
+  //printf("%llu gamma_%i(%llu,%i) = %g\n", l.i + r, r, l.i, l.n, res/noemer);
   return res/noemer;
+}
+
+typedef struct gamma_list {
+  int i, r;
+  double gamma;
+  struct gamma_list *next;
+} gamma_list;
+
+gamma_list *gamma_list_create( int i, int r, double gamma) {
+  gamma_list *list = malloc( sizeof( gamma_list));
+  list->i = i;
+  list->r = r;
+  list->gamma = gamma;
+  list->next = NULL;
+  return list;
+}
+
+gamma_list *gamma_list_insert_after( gamma_list *list, int i, int r, double gamma) {
+  gamma_list *new = gamma_list_create( i, r, gamma);
+  new->next = list->next;
+  list->next = new;
+  return new;
+}
+
+double leg_gamma_memoize( function f, boundary int_bounds, location l, int r) {
+  //return leg_gamma( f, int_bounds, l, r);
+  static gamma_list *gamma[MAXN][MAXN] = {{NULL}};
+  int index = (l.i + r) % MAXN; //TODO: think of a better hash function
+  gamma_list *cur;
+  if( (cur = gamma[l.n][index]) != NULL) {
+    while( cur->next != NULL) {
+      if( cur->i == l.i && cur->r == r) {
+        return cur->gamma;
+      }
+      cur = cur->next;
+    }
+    if( cur->i == l.i && cur->r == r) {
+      return cur->gamma;
+    }
+
+    double res = leg_gamma( f, int_bounds, l, r);
+    gamma_list_insert_after( cur, l.i, r, res);
+    return res;
+  } else {
+    double res = leg_gamma( f, int_bounds, l, r);
+    gamma[l.n][index] = gamma_list_create( l.i, r, res);
+    return res;
+  }
 }
 
 /* Given degrees of freedom r, find polynomial of best approximation to f on 
@@ -112,8 +263,8 @@ double leg_gamma( function f, boundary int_bounds, location l, int n) {
 double error_2norm_leg( function f, boundary b, location l, int r) {
   boundary int_bounds = leg_node( b, l);
   //find best polynomial
-  //printf("Finding error on (%i,%i) with degrees of freedom %i\n", l.i, l.n, r);
-  printf("%i,%i,%i\n", l.i, l.n, r);
+  //printf("Finding error on (%llu,%i) with degrees of freedom %i\n", l.i, l.n, r);
+  //printf("%llu,%i,%i\n", l.i, l.n, r);
   assert( r > 0);
   double coeffs[r];
   int n;
@@ -121,7 +272,7 @@ double error_2norm_leg( function f, boundary b, location l, int r) {
   #pragma omp parallel for
   #endif
   for( n = 0; n < r; n++) {
-    coeffs[n] = leg_gamma( f, int_bounds, l, n);
+    coeffs[n] = leg_gamma_memoize( f, int_bounds, l, n);
   }
 
   //find its two-norm

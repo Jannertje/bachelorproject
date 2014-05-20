@@ -299,7 +299,7 @@ tree *algo_binev2013( algo_info *i, int n) {
   } else {
     int j;
     for( j = 0; j < n; j++) {
-      //printf("Iteration %i\n", j);
+      printf("Iteration %i\n", j);
       if( Thp != NULL) {
         tree_free_subtree( Thp);
       }
@@ -323,7 +323,7 @@ tree *algo_binev2013( algo_info *i, int n) {
     cur = cur->next;
   }
   tree_list_free( leaves);
-  tree_print( Thp);
+  //tree_print( Thp);
   tree_free_subtree( TN);
 
   printf("Total sum of leaf errors: %g\n", leaves_sum_real_error);

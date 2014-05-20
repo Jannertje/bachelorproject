@@ -13,4 +13,6 @@
 
 #define POW2( n) ( 1<<(n))
 
+#define MAXN 64
+
 #endif

@@ -11,17 +11,13 @@
 #include "sorter.h"
 #include "algo.h"
 
-boundary b = {-1.0, 1.0};
+boundary b = {0.0, 1.0};
 double f( double x) {
-  /*
   if( x < 0) {
     return x;
   } else {
     return x*x;
   }
-  */
-  assert( x >= b.a && x <= b.b);
-  return sin(x);
 }
 
 void run( void) {

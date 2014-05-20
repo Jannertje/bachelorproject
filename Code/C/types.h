@@ -1,9 +1,13 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
+typedef struct location {
+  unsigned long long int i;
+  unsigned int n;
+} location;
+
 typedef struct boundary {
-  double a;
-  double b;
+  double a, b;
 } boundary;
 
 typedef struct error_info {
@@ -21,7 +25,7 @@ typedef struct hptree {
 } hptree;
 
 typedef struct tree {
-  boundary b;
+  location l;
   struct tree **forest;
   struct tree *parent;
   union t {
@@ -37,7 +41,7 @@ typedef struct tree_list {
 } tree_list;
 
 typedef double ( *function)( double x);
-typedef double ( *error)( function, boundary, int);
+typedef double ( *error)( function, boundary, location, int);
 typedef int ( *sorter)( tree_list *, tree_list **);
 
 typedef struct algo_info {

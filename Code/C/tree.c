@@ -35,8 +35,8 @@ tree *htree_copy( tree *self) {
 tree *tree_create( location l,
                    tree *left, tree *right, 
                    tree *parent) {
-  assert( l.n < 64); //TODO: fix
-  assert( l.i < POW2( l.n));
+  assert( l.n < MAXN); //TODO: fix
+  assert( l.i < pow( 2.0, l.n));
   assert( left != NULL || right == NULL); //left == NULL => right == NULL
 
   tree *new = malloc( sizeof( tree));
@@ -83,7 +83,7 @@ void printer( tree *self, int indent) {
   for( i = 0; i < indent; i++) {
     printf("  ");
   }
-  printf("%p:(%i,%i)", self, self->l.i, self->l.n);
+  printf("%p:(%llu,%i)", self, self->l.i, self->l.n);
   if( tree_is_leaf( self)) {
     if( !self->is_hp) {
       printf(" (%g)\n", htree_error_info( self).real_error);
@@ -340,7 +340,7 @@ tree *tree_list_find_node( tree *node, tree_list *list) {
 
 void tree_list_print( tree_list *list) {
   while( list != NULL) {
-    printf("(%i,%i) ", list->node->l.i, list->node->l.n);
+    printf("(%llu,%i) ", list->node->l.i, list->node->l.n);
     list = list->next;
   }
   printf("\n");
