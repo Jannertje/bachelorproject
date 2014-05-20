@@ -64,7 +64,7 @@ double _gamma( function f, boundary b, int l) {
     exit(-1);
   }
   double noemer = (b.b-b.a)/(2*l + 1);
-  printf("gamma_%i[%g,%g] = %g\n", l, b.a, b.b, teller/noemer);
+  printf("gamma_%i[%f,%f] = %g\n", l, b.a, b.b, teller/noemer);
   return teller/noemer;
 }
 
@@ -108,6 +108,9 @@ double error_2norm( function f, boundary b, int r) {
   assert( r > 0);
   double coeffs[r];
   int l;
+  #ifdef OPENMP
+  #pragma omp parallel for
+  #endif
   for( l = 0; l < r; l++) {
     coeffs[l] = _gamma( f, b, l);
   }

@@ -285,7 +285,7 @@ tree *algo_binev2013( algo_info *i, int n) {
   if( n < 0) {
     int j = 0;
     while( 1) {
-      printf("Iteration %i\n", j);
+      //printf("Iteration %i\n", j);
       if( Thp != NULL) {
         tree_free_subtree( Thp);
       }
@@ -298,7 +298,7 @@ tree *algo_binev2013( algo_info *i, int n) {
   } else {
     int j;
     for( j = 0; j < n; j++) {
-      printf("Iteration %i\n", j);
+      //printf("Iteration %i\n", j);
       if( Thp != NULL) {
         tree_free_subtree( Thp);
       }
