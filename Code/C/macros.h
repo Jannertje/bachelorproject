@@ -11,4 +11,6 @@
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
+#define POW2( n) ( 1<<(n))
+
 #endif

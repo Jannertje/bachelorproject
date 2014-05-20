@@ -10,11 +10,11 @@
 /*
  * Returns a value in {-1,0,1} in accorance with strcmp
  */
-int boundary_compare( boundary b1, boundary b2) {
-  if( b1.a < b2.a) return -1;
-  if( b1.a > b2.a) return 1;
-  if( b1.b < b2.b) return -1;
-  if( b1.b > b2.b) return 1;
+int location_compare( location l1, location l2) {
+  if( l1.i < l2.i) return -1;
+  if( l1.i > l2.i) return 1;
+  if( l1.n < l2.n) return -1;
+  if( l1.n > l2.n) return 1;
   return 0;
 }
 
@@ -22,7 +22,7 @@ tree *copier( tree *self, tree *parent) {
   if( self == NULL) return NULL;
   assert( !self->is_hp);
   tree *new;
-  new = htree_create( self->b, NULL, NULL, parent, self->t.h->e);
+  new = htree_create( self->l, NULL, NULL, parent, self->t.h->e);
   new->forest[0] = copier( self->forest[0], new);
   new->forest[1] = copier( self->forest[1], new);
   return new;
@@ -32,15 +32,15 @@ tree *htree_copy( tree *self) {
   return copier( self, NULL);
 }
 
-tree *tree_create( boundary b,
+tree *tree_create( location l,
                    tree *left, tree *right, 
                    tree *parent) {
-
-  assert( b.a < b.b); //[a,b] is a proper interval
+  assert( l.n < 64); //TODO: fix
+  assert( l.i < POW2( l.n));
   assert( left != NULL || right == NULL); //left == NULL => right == NULL
 
   tree *new = malloc( sizeof( tree));
-  new->b = b;
+  new->l = l;
   new->forest = malloc( 2 * sizeof( tree));
   new->parent = parent;
 
@@ -50,13 +50,13 @@ tree *tree_create( boundary b,
   return new;
 }
 
-tree *hptree_create( boundary b,
+tree *hptree_create( location l,
                    tree *left, tree *right, 
                    tree *parent,
                    error_info e,
                    int r) {
   
-  tree *new = tree_create( b, left, right, parent);
+  tree *new = tree_create( l, left, right, parent);
 
   new->is_hp = 1;
   new->t.hp = malloc( sizeof( hptree));
@@ -64,12 +64,12 @@ tree *hptree_create( boundary b,
   return new;
 }
 
-tree *htree_create( boundary b,
+tree *htree_create( location l,
                    tree *left, tree *right, 
                    tree *parent,
                    error_info e) {
   
-  tree *new = tree_create( b, left, right, parent);
+  tree *new = tree_create( l, left, right, parent);
 
   new->is_hp = 0;
   new->t.h = malloc( sizeof( htree));
@@ -83,7 +83,7 @@ void printer( tree *self, int indent) {
   for( i = 0; i < indent; i++) {
     printf("  ");
   }
-  printf("%p:[%g,%g]", self, self->b.a, self->b.b);
+  printf("%p:(%i,%i)", self, self->l.i, self->l.n);
   if( tree_is_leaf( self)) {
     if( !self->is_hp) {
       printf(" (%g)\n", htree_error_info( self).real_error);
@@ -104,11 +104,10 @@ void tree_print( tree *self) {
 int tree_subdivide( tree *self) {
   assert( tree_is_leaf( self));
 
-  double a = self->b.a;
-  double b = self->b.b;
-  double h = (a+b)/2.0;
-  boundary left = {a, h};
-  boundary right = {h, b};
+  int i = self->l.i;
+  int n = self->l.n;
+  location left = {2*i, n+1};
+  location right = {2*i+1, n+1};
   error_info e = {-1.0, -1.0};
 
   if( !self->is_hp) {
@@ -248,7 +247,7 @@ int hptree_r( tree *self) {
 
 tree *tree_find_node( tree *node, tree *self) {
   //pre-order traverse for the moment. TODO
-  if( boundary_compare( self->b, node->b) == 0) {
+  if( location_compare( self->l, node->l) == 0) {
     return self;
   }
   if( tree_is_leaf( self)) {
@@ -331,7 +330,7 @@ tree *tree_list_popleft( tree_list **list) {
 
 tree *tree_list_find_node( tree *node, tree_list *list) {
   while( list != NULL) {
-    if( boundary_compare( list->node->b, node->b) == 0) {
+    if( location_compare( list->node->l, node->l) == 0) {
       return list->node;
     }
     list = list->next;
@@ -341,7 +340,7 @@ tree *tree_list_find_node( tree *node, tree_list *list) {
 
 void tree_list_print( tree_list *list) {
   while( list != NULL) {
-    printf("[%g,%g] ", list->node->b.a, list->node->b.b);
+    printf("(%i,%i) ", list->node->l.i, list->node->l.n);
     list = list->next;
   }
   printf("\n");

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <assert.h>
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
@@ -19,11 +20,12 @@ double f( double x) {
     return x*x;
   }
   */
+  assert( x >= b.a && x <= b.b);
   return sin(x);
 }
 
 void run( void) {
-  algo_info i = { &f, b, &sorter_sort, &error_2norm};
+  algo_info i = { &f, b, &sorter_sort, &error_2norm_leg};
   tree *tree = algo_binev2007( &i, 4, 1);
   tree_free_subtree( tree);
 }
@@ -37,7 +39,7 @@ int main( int argc, char **argv) {
 
   tree *( *algo)() = algo_binev2007;
   int r = 1, n = 4;
-  algo_info i = { &f, b, &sorter_sort, &error_2norm};
+  algo_info i = { &f, b, &sorter_sort, &error_2norm_leg};
   int is_hp = 0;
 
   int c;
@@ -53,7 +55,7 @@ int main( int argc, char **argv) {
         }
         break;
       case 'e':
-        if( strcmp( optarg, "2norm") != 0) {
+        if( strcmp( optarg, "leg") != 0) {
           printf("Unknown argument %s for option -e.\n", optarg);
           showUsage( argv[0]);
           return 1;

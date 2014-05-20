@@ -19,7 +19,7 @@ error_info greedy_error( algo_info *i, tree *node, int r) {
   if( (e = htree_error_info( node)).error > -1.0) {
     return e;
   } else {
-    double error = i->e( i->f, node->b, r);
+    double error = i->e( i->f, i->b, node->l, r);
     e.error = error;
     e.real_error = error;
     node->t.h->e = e;
@@ -39,7 +39,7 @@ double real_error( algo_info *i, tree *node, int r) {
   if( (e = htree_error_info( node).real_error) > -1.0) {
     return e;
   } else {
-    double real_error = i->e( i->f, node->b, r);
+    double real_error = i->e( i->f, i->b, node->l, r);
     node->t.h->e.real_error = real_error;
     return real_error;
   }
@@ -152,7 +152,7 @@ double binev2013_total_error( algo_info *i, tree *node, tree *T, tree *TN) {
   while( cur != NULL) {
     tree *dummy;
     int r_node = htree_r_node( cur->node, TN, &dummy);
-    sum += (i->e)( i->f, cur->node->b, r_node);
+    sum += (i->e)( i->f, i->b, cur->node->l, r_node);
     cur = cur->next;
   }
 
@@ -165,12 +165,12 @@ tree *binev2013_generator( tree *TN, tree *T, tree *parent) {
   tree *Thp;
   if( tree_is_leaf( T)) {
     tree *dummy = NULL;
-    Thp = hptree_create( T->b, NULL, NULL, parent, T->t.h->e, -1);
+    Thp = hptree_create( T->l, NULL, NULL, parent, T->t.h->e, -1);
     Thp->t.hp->r = htree_r_node( T, TN, &dummy);
     //printf("  \\node = [%g,%g], r(\\node) = %i\n", Thp->b.a, Thp->b.b, Thp->t.hp->r);
   } else {
     //no leaf, we dont care about error or r.
-    Thp = hptree_create( T->b, NULL, NULL, parent, T->t.h->e, -1);
+    Thp = hptree_create( T->l, NULL, NULL, parent, T->t.h->e, -1);
     Thp->forest[0] = binev2013_generator( TN, T->forest[0], Thp);
     Thp->forest[1] = binev2013_generator( TN, T->forest[1], Thp);
   }
@@ -220,7 +220,7 @@ int binev2013_iterator( algo_info *i, tree **TN, int generate_Thp, tree **Thp) {
   while( cur != NULL) {
     tree *TN_node_in_TN = NULL;
     int r_node = htree_r_node( cur->node, *TN, &TN_node_in_TN); //TN_node_in_TN is now set
-    double realerror = (i->e)( i->f, cur->node->b, r_node);
+    double realerror = (i->e)( i->f, i->b, cur->node->l, r_node);
     double totalerror = binev2013_total_error( i, cur->node, T, *TN);
     //printf("  \\node = [%g, %g], r(\\node) = %i, e_r(\\node) = %g, E_T(\\node) = %g \n", cur->node->b.a, cur->node->b.b, r_node, realerror, totalerror);
     if( realerror < totalerror) {
@@ -279,13 +279,14 @@ int binev2013_iterator( algo_info *i, tree **TN, int generate_Thp, tree **Thp) {
 tree *algo_binev2013( algo_info *i, int n) {
   printf("Running Binev2013 algorithm; iterations: %i.\n", n);
   error_info e = {-1.0, -1.0};
-  tree *TN = htree_create( i->b, NULL, NULL, NULL, e);
+  location init = {0, 0};
+  tree *TN = htree_create( init, NULL, NULL, NULL, e);
   tree *Thp = NULL;
   int generate_Thp = 1;
   if( n < 0) {
     int j = 0;
     while( 1) {
-      //printf("Iteration %i\n", j);
+      printf("Iteration %i\n", j);
       if( Thp != NULL) {
         tree_free_subtree( Thp);
       }
@@ -313,7 +314,10 @@ tree *algo_binev2013( algo_info *i, int n) {
   tree_list *cur = leaves;
   while( cur != NULL) {
     if( hptree_error_info( cur->node).real_error < 0.0) {
-      cur->node->t.hp->e.real_error = i->e(i->f, cur->node->b, hptree_r( cur->node));
+      cur->node->t.hp->e.real_error = i->e(i->f, 
+                                           i->b, 
+                                           cur->node->l, 
+                                           hptree_r( cur->node));
     }
     leaves_sum_real_error += cur->node->t.hp->e.real_error;
     cur = cur->next;
@@ -372,7 +376,8 @@ tree *runner( algo_type algo, algo_info *i, int r, int n) {
   }
   
   error_info e = {-1.0, -1.0};
-  tree *t = htree_create( i->b, NULL, NULL, NULL, e);
+  location init = {0, 0};
+  tree *t = htree_create( init, NULL, NULL, NULL, e);
 
   if( n < 0) {
     int j = 0;
@@ -398,7 +403,7 @@ tree *runner( algo_type algo, algo_info *i, int r, int n) {
   tree_list *cur = leaves;
   while( cur != NULL) {
     if( htree_error_info( cur->node).real_error == -1.0) {
-      cur->node->t.h->e.real_error = i->e( i->f, cur->node->b, r);
+      cur->node->t.h->e.real_error = i->e( i->f, i->b, cur->node->l, r);
     }
     leaves_sum_real_error += cur->node->t.h->e.real_error;
     cur = cur->next;

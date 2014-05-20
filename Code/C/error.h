@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-double error_2norm( function f, boundary b, int r);
+double error_2norm_leg( function f, boundary b, location l, int r);
 
 #endif
 

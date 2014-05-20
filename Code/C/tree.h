@@ -3,9 +3,9 @@
 
 #include "types.h"
 
-int boundary_compare( boundary b1, boundary b2);
+int location_compare( location l1, location l2);
 
-tree *htree_create( boundary b,
+tree *htree_create( location l,
                    tree *left, tree *right, 
                    tree *parent,
                    error_info e);
@@ -13,7 +13,7 @@ error_info htree_error_info( tree *self);
 int htree_r_node( tree *node, tree *TN, tree **node_in_TN);
 tree *htree_copy( tree *self);
 
-tree *hptree_create( boundary b,
+tree *hptree_create( location l,
                    tree *left, tree *right, 
                    tree *parent,
                    error_info e,
