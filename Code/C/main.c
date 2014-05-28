@@ -11,7 +11,7 @@
 #include "sorter.h"
 #include "algo.h"
 
-boundary b = {0.0, 1.0};
+boundary b = {-1.0, 1.0};
 double f( double x) {
   if( x < 0) {
     return x;

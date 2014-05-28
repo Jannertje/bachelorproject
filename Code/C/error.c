@@ -10,6 +10,8 @@
 #include "error.h"
 
 #define ERR 1e-7
+#define LMAX 64
+#define XBINS 1024
 
 struct leg_mul_s {
   function f;
@@ -39,36 +41,111 @@ boundary leg_node( boundary b, location l) {
   return res;
 }
 
-int leg_Pl_e(const int l, const double x, gsl_sf_result * result) {
-  //printf("%i %g %lu\n", l, x, *( long *) &x);
+typedef struct Pl_list {
+  double *Pl;
+  int lmax;
+  double x;
+  struct Pl_list *next;
+} Pl_list;
+
+Pl_list *Pl_list_create( double x, int lmax) {
+  Pl_list *list = malloc( sizeof( Pl_list));
+  list->x = x;
+  list->Pl = malloc( LMAX * sizeof( double));
+  gsl_sf_legendre_Pl_array( MIN(lmax,LMAX-1), x, list->Pl);
+  list->lmax = MIN(lmax,LMAX-1);
+  return list;
+}
+
+Pl_list *Pl_list_insert_beginning( Pl_list *list, double x, int lmax) {
+  Pl_list *new = Pl_list_create( x, lmax);
+  new->next = list;
+  return new;
+}
+
+int leg_Pl_e(const int l, const double xab, double *result, boundary int_bounds) {
+  double x = leg_ab2m11( int_bounds, xab);
   if(l < 0 || x < -1.0 || x > 1.0) {
     GSL_ERROR ("domain error", GSL_EDOM);
   }
   else if(l == 0) {
-    result->val = 1.0;
-    result->err = 0.0;
+    *result = 1.0;
     return GSL_SUCCESS;
   }
   else if(l == 1) {
-    result->val = x;
-    result->err = 0.0;
+    *result = x;
     return GSL_SUCCESS;
   }
   else if(l == 2) {
-    result->val = 0.5 * (3.0*x*x - 1.0);
-    result->err = GSL_DBL_EPSILON * (fabs(3.0*x*x) + 1.0);
+    *result = 0.5 * (3.0*x*x - 1.0);
     return GSL_SUCCESS;
   }
   else if(x == 1.0) {
-    result->val = 1.0;
-    result->err = 0.0;
+    *result = 1.0;
     return GSL_SUCCESS;
   }
   else if(x == -1.0) {
-    result->val = ( GSL_IS_ODD(l) ? -1.0 : 1.0 );
-    result->err = 0.0;
+    *result = ( GSL_IS_ODD(l) ? -1.0 : 1.0 );
     return GSL_SUCCESS;
   }
+  /*
+  else if( x < 0) {
+    int res = leg_Pl_e( l, -x, result);
+    *result *= GSL_IS_ODD( l) ? -1.0 : 1.0;
+    return res;
+  }
+  else if( l < LMAX) {
+    static Pl_list *pl[XBINS] = {NULL};
+    long xlong = ( *(long *) &x);
+    int xbin = (xlong) & (XBINS - 1);
+    //printf("%i %g %li %i\n", l, x, xlong, xbin);
+    Pl_list *cur;
+    if( (cur = pl[xbin]) != NULL) {
+      while( cur->next != NULL) {
+        if( cur->x == x) {
+          if( l < cur->lmax) {
+            return cur->Pl[l];
+          } else {
+            double p_ellm2 = cur->Pl[cur->lmax-2];
+            double p_ellm1 = cur->Pl[cur->lmax-1];
+            double p_ell = p_ellm1;
+            int ell;
+            for( ell = cur->lmax; ell <= l; ell++) {
+              p_ell = (x*(2*ell-1)*p_ellm1 - (ell-1)*p_ellm2) / ell;
+              p_ellm2 = p_ellm1;
+              p_ellm1 = p_ell;
+              cur->Pl[l] = p_ell;
+            }
+            cur->lmax = l;
+            return p_ell;
+          }
+        }
+        cur = cur->next;
+      }
+      if( cur->x == x) {
+        if( l < cur->lmax) {
+          return cur->Pl[l];
+        } else {
+          double p_ellm2 = cur->Pl[cur->lmax-2];
+          double p_ellm1 = cur->Pl[cur->lmax-1];
+          double p_ell = p_ellm1;
+          int ell;
+          for( ell = cur->lmax; ell <= l; ell++) {
+            p_ell = (x*(2*ell-1)*p_ellm1 - (ell-1)*p_ellm2) / ell;
+            p_ellm2 = p_ellm1;
+            p_ellm1 = p_ell;
+            cur->Pl[l] = p_ell;
+          }
+          cur->lmax = l;
+          return p_ell;
+        }
+      }
+      pl[xbin] = Pl_list_insert_beginning( pl[xbin], x, l);
+      return cur->Pl[l];
+    }
+    return GSL_SUCCESS;
+  }
+  */
   else if(l < 100000) {
     /* upward recurrence: l P_l = (2l-1) z P_{l-1} - (l-1) P_{l-2} */
 
@@ -91,53 +168,11 @@ int leg_Pl_e(const int l, const double x, gsl_sf_result * result) {
       e_ellm2 = e_ellm1;
       e_ellm1 = e_ell;
     }
-    result->val = p_ell;
-    result->err = e_ell + l*fabs(p_ell)*GSL_DBL_EPSILON;
+    *result = p_ell;
+    printf("%g %g\n", xab,  p_ell);
     return GSL_SUCCESS;
   } else {
     GSL_ERROR ("polynomial degree too high", GSL_EDOM);
-  }
-}
-
-int leg_Pl_array(const int lmax, const double x, double * result_array) {
-  /* CHECK_POINTER(result_array) */
-
-  /*
-  for( int i = 0; i <= lmax; i++) {
-    printf("%i %g %lu\n", i, x, *( long *) &x);
-  }
-  */
-  if(lmax < 0 || x < -1.0 || x > 1.0) {
-    GSL_ERROR ("domain error", GSL_EDOM);
-  }
-  else if(lmax == 0) {
-    result_array[0] = 1.0;
-    return GSL_SUCCESS;
-  }
-  else if(lmax == 1) {
-    result_array[0] = 1.0;
-    result_array[1] = x;
-    return GSL_SUCCESS;
-  }
-  else {
-    /* upward recurrence: l P_l = (2l-1) z P_{l-1} - (l-1) P_{l-2} */
-
-    double p_ellm2 = 1.0; /* P_0(x) */
-    double p_ellm1 = x; /* P_1(x) */
-    double p_ell = p_ellm1;
-    int ell;
-
-    result_array[0] = 1.0;
-    result_array[1] = x;
-
-    for(ell=2; ell <= lmax; ell++){
-      p_ell = (x*(2*ell-1)*p_ellm1 - (ell-1)*p_ellm2) / ell;
-      p_ellm2 = p_ellm1;
-      p_ellm1 = p_ell;
-      result_array[ell] = p_ell;
-    }
-
-    return GSL_SUCCESS;
   }
 }
 
@@ -148,7 +183,7 @@ int leg_Pl_array(const int lmax, const double x, double * result_array) {
  */
 double leg_sum( double *coeffs, boundary int_bounds, int r, double x) {
   double leg_res[r];
-  leg_Pl_array( r-1, leg_ab2m11( int_bounds, x), leg_res);
+  gsl_sf_legendre_Pl_array( r-1, leg_ab2m11( int_bounds, x), leg_res);
   double res = 0.0;
   int n;
   for( n = 0; n < r; n++) {
@@ -174,9 +209,9 @@ double leg_approx_quad( double x, void *params) {
  */
 double leg_mul( double x, void *params) {
   struct leg_mul_s *p = (struct leg_mul_s *) params;
-  gsl_sf_result res;
-  leg_Pl_e( p->n, leg_ab2m11( p->int_bounds, x), &res);
-  return (p->f)(x) * res.val;
+  double res;
+  leg_Pl_e( p->n, x, &res, p->int_bounds);
+  return (p->f)(x) * res;
 }
 
 /*
@@ -199,7 +234,6 @@ double leg_gamma( function f, boundary int_bounds, location l, int r) {
   */
   if( status) {
     printf("hioihoi %g %i %i\n", err, status, GSL_EDIVERGE);
-    exit(-1);
   }
   double noemer = (int_bounds.b - int_bounds.a)/(2*r + 1);
   //printf("%llu gamma_%i(%llu,%i) = %g\n", l.i + r, r, l.i, l.n, res/noemer);
@@ -229,9 +263,8 @@ gamma_list *gamma_list_insert_after( gamma_list *list, int i, int r, double gamm
 }
 
 double leg_gamma_memoize( function f, boundary int_bounds, location l, int r) {
-  //return leg_gamma( f, int_bounds, l, r);
-  static gamma_list *gamma[MAXN][MAXN] = {{NULL}};
-  int index = (l.i + r) % MAXN; //TODO: think of a better hash function
+  static gamma_list *gamma[MAXN][2048] = {{NULL}};
+  int index = (l.i * l.i + l.i + r) % 2048; //TODO: think of a better hash function. Szudzik's function
   gamma_list *cur;
   if( (cur = gamma[l.n][index]) != NULL) {
     while( cur->next != NULL) {
