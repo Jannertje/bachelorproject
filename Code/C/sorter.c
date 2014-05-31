@@ -30,8 +30,6 @@ int sorter_bins( tree_list *leaves, tree_list **bests) {
   return 0;
 }
 
-/* TODO: sorteer je wel een lijst hier? het lijkt gewoon linear complexity te hebben!
- */
 int sorter_sort( tree_list *leaves, tree_list **bests) {
   double best_error = -1.0;
   tree_list *cur = leaves;

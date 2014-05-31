@@ -11,7 +11,14 @@
 #include "sorter.h"
 #include "algo.h"
 
+/* 
+ * problem interval 
+ */
 boundary b = {-1.0, 1.0};
+
+/* 
+ * Function to approximate
+ */
 double f( double x) {
   if( x < 0) {
     return x;
@@ -27,7 +34,8 @@ void run( void) {
 }
 
 void showUsage( char *argv0) {
-  printf("Usage: %s [-s bins|hist] [-e 2norm] [-r #>0] [-n #] [-a greedy|binev2004|binev2007|binev2013]", argv0);
+  printf("Usage: %s [-s bins|hist] [-e 2norm] [-r #>0] [-n #] "
+         "[-a greedy|binev2004|binev2007|binev2013]", argv0);
 }
 
 int main( int argc, char **argv) {

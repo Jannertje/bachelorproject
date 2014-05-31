@@ -88,7 +88,8 @@ void printer( tree *self, int indent) {
     if( !self->is_hp) {
       printf(" (%g)\n", htree_error_info( self).real_error);
     } else {
-      printf(" (%g, %i)\n", hptree_error_info( self).real_error, hptree_r( self));
+      printf(" (%g, %i)\n", hptree_error_info( self).real_error, 
+                            hptree_r( self));
     }
   } else {
     printf("\n");
@@ -129,7 +130,8 @@ int tree_num_leaves( tree *self) {
 }
 
 /*
- * TODO: of course there are multiple traversals possible. choose the best for the job?
+ * TODO: of course there are multiple traversals possible. 
+ * choose the best for the job?
  */
 tree_list *tree_nodes( tree *self) {
   tree_list *list = tree_list_create( self);
