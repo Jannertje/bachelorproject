@@ -14,13 +14,13 @@
 /* 
  * problem interval 
  */
-boundary b = {-1.0, 1.0};
+boundary b = {0.0, 1.0};
 
 /* 
  * Function to approximate
  */
 double f( double x) {
-  if( x < 0) {
+  if( x*x < 1/2.0) {
     return x;
   } else {
     return x*x;
