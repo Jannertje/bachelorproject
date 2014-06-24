@@ -22,15 +22,11 @@ typedef struct hp {
 
   double *tehp;
   int lentehp;
-
-  double **coeffs;
-  int lencoeffs;
 } hp;
 
 typedef struct h {
   int r;
   double e, te;
-  double *coeffs;
 } h;
 
 typedef struct tree {
@@ -42,6 +38,8 @@ typedef struct tree {
     hp *hp;
     h *h;
   } info;
+  double *gammas;
+  int hgammas, lengammas;
   int hp;
 } tree;
 

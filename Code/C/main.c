@@ -14,7 +14,7 @@
 
 double f( double x, double y) {
   if( x+y < 1.1) {
-    return 0;
+    return x;
   }
   else {
     return 1;
@@ -46,28 +46,12 @@ int main( void) {
   partition_match( w);
 
   if( hp) {
-    treegen_hp( w, 7);
+    treegen_hp( w, 3);
   } else {
     treegen_h( w, 10, 2);
   }
   partition_make_conform( w);
-  //workspace_print_plot( w);
-  for( i = 0; i < w->nleaves; i++) {
-    int j;
-    printf("%i\n", w->leaves[i]->i);
-    for( j = 0; j < w->leaves[i]->info.hp->lencoeffs; j++) {
-      int r;
-      double *coeffs;
-      if( !hptree_get_coeffs( w, w->leaves[i], j, &r, &coeffs)) {
-        printf("\t%i ", r);
-        int k;
-        for( k = 0; k < r; k++) {
-          printf("%g ", coeffs[k]);
-        }
-        printf("\n");
-      }
-    }
-  }
+  workspace_print_plot( w);
   return 0;
   workspace_print( w);
 

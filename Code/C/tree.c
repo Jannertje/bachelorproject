@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 #include "tree.h"
 #include "helper.h"
 #include "error.h"
@@ -31,11 +32,6 @@ hp *hp_create() {
   new->e[1] = -1;
   new->lene = 2;
 
-  new->coeffs = malloc( 2*sizeof( double *));
-  new->coeffs[0] = NULL;
-  new->coeffs[1] = NULL;
-  new->lencoeffs = 2;
-
   return new;
 }
 
@@ -48,6 +44,21 @@ tree *tree_create( workspace *w, int i, tree *parent, tree *left, tree *right, i
   new->right = right;
   new->hp = hp;
   new->t = NULL;
+  new->gammas = malloc( 2*sizeof( double));
+  new->gammas[0] = NAN;
+  new->gammas[1] = NAN;
+  /*
+  new->gammas[2] = NAN;
+  new->gammas[3] = NAN;
+  new->gammas[4] = NAN;
+  new->gammas[5] = NAN;
+  new->gammas[6] = NAN;
+  new->gammas[7] = NAN;
+  new->gammas[8] = NAN;
+  new->gammas[9] = NAN;
+  */
+  new->lengammas = 2;
+  new->hgammas = 0;
 
   if( hp) {
     new->info.hp = hp_create();
@@ -56,7 +67,6 @@ tree *tree_create( workspace *w, int i, tree *parent, tree *left, tree *right, i
     new->info.h->r = -1;
     new->info.h->e = -1;
     new->info.h->te = -1;
-    new->info.h->coeffs = NULL;
   }
 
   return new;
@@ -138,40 +148,27 @@ double htree_get_e( workspace *w, tree *node) {
   }
 }
 
-void hptree_set_coeffs( workspace *w, tree *node, int r, double *coeffs) {
-  assert( node->hp);
+void tree_set_gamma( workspace *w, tree *node, int i, double gamma) {
+  assert( node->lengammas > i);
 
-  if( node->info.hp->lencoeffs < r) {
-    int i;
-    int pow2 = pow2roundup( r);
-    node->info.hp->coeffs = realloc( node->info.hp->coeffs, 2*pow2*sizeof( double *));
-    for( i = node->info.hp->lencoeffs; i < 2*pow2; i++) {
-      node->info.hp->coeffs[i] = NULL;
+  node->gammas[i] = gamma;
+  if( i > node->hgammas) {
+    node->hgammas = i;
+  }
+}
+
+double tree_get_gamma( workspace *w, tree *node, int i) {
+  if( node->lengammas <= i) {
+    int j;
+    int pow2 = pow2roundup( i);
+    node->gammas = realloc( node->gammas, 2*pow2*sizeof( double));
+    for( j = node->hgammas+1; j < 2*pow2; j++) {
+      node->gammas[j] = NAN;
     }
-    node->info.hp->lencoeffs = 2*pow2;
+    node->lengammas = 2*pow2;
   }
-  node->info.hp->coeffs[r-1] = coeffs;
-}
 
-int hptree_get_coeffs( workspace *w, tree *node, int r, int *len, double **coeffs) {
-  assert( node->hp);
-  if( node->info.hp->lencoeffs < r || node->info.hp->coeffs[r-1] == NULL) {
-    return 1;
-  }
-  *coeffs = node->info.hp->coeffs[r-1];
-  *len = (r+1)*r/2;
-  return 0;
-}
-
-int htree_get_coeffs( workspace *w, tree *node, int *len, double **coeffs) {
-  assert( !node->hp);
-  if( node->info.h->coeffs == NULL) {
-    return 1;
-  }
-  *coeffs = node->info.h->coeffs;
-  int r = node->info.h->r;
-  *len = (r+1)*r/2;
-  return 0;
+  return node->gammas[i];
 }
 
 int tree_is_leaf( tree *node) {
@@ -196,7 +193,6 @@ void tree_trim( workspace *w, tree *node) {
 }
 
 void tree_subdivide( workspace *w, tree *node) {
-  int j;
   assert( tree_is_leaf( node));
 
   //create point midway refinement edge

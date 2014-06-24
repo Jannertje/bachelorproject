@@ -1,0 +1,1645 @@
+version: 1
+creator: callgrind-3.9.0
+pid: 8818
+cmd:  ./main
+part: 2
+
+
+desc: I1 cache: 
+desc: D1 cache: 
+desc: LL cache: 
+
+desc: Timerange: Basic block 100173523 - 200180902
+desc: Trigger: --dump-every-bb=100000000
+
+positions: line
+events: Ir
+summary: 793247841
+
+
+ob=(6) /usr/lib/system/libsystem_platform.dylib
+fl=(6) ???
+fn=(570) spin_lock
+0 325220
+
+fn=(576) spin_unlock
+0 195132
+
+fn=(584) OSAtomicCompareAndSwap64$VARIANT$mp
+0 90
+
+fn=(606) _platform_memmove$VARIANT$Ivybridge
+0 3306
+
+ob=(10) /usr/lib/system/libsystem_kernel.dylib
+fl=(10) ???
+fn=(1518) write$NOCANCEL
+0 45
+
+ob=(7) /usr/lib/system/libsystem_c.dylib
+fl=(7) ???
+fn=(1492) flockfile
+0 54
+cfn=(675) __vsnprintf_chk'2
+calls=9 0 
+0 27
+0 54
+cfn=(675)
+calls=9 0 
+0 1233
+0 81
+
+fn=(1506) __ultoa
+0 1116
+
+fn=(1514) _swrite
+0 135
+cfn=(1516) __swrite
+calls=9 0 
+0 108
+0 135
+
+fn=(1500) localeconv_l
+0 171
+
+fn=(1508) __sfvwrite
+0 4140
+cfn=(675)
+calls=99 0 
+0 2568
+0 1728
+
+fn=(1510) __fflush
+0 81
+cfn=(1512) __sflush
+calls=9 0 
+0 783
+
+fn=(1488) fprintf
+0 225
+cfn=(674) __vsnprintf_chk
+calls=9 0 
+0 27
+0 63
+cfn=(674)
+calls=9 0 
+0 28443
+0 81
+
+fn=(1490) vfprintf_l
+0 99
+cfn=(675)
+calls=9 0 
+0 1458
+0 63
+cfn=(1494) __xvprintf
+calls=9 0 
+0 25032
+0 27
+cfn=(675)
+calls=9 0 
+0 1692
+0 63
+
+fn=(1512)
+0 189
+
+ob=(12) /usr/lib/system/libsystem_malloc.dylib
+fl=(12) ???
+fn=(878) malloc_zone_malloc
+0 553231
+cfn=(880) szone_malloc
+calls=32543 0 
+0 8433720
+0 357973
+
+fn=(1062) get_tiny_free_size
+0 368
+
+fn=(1560) small_free_list_remove_ptr
+0 2092992
+
+fn=(1558) small_free_list_add_ptr
+0 3692378
+
+fn=(1058) get_tiny_previous_free_msize
+0 418
+
+fn=(1076) tiny_free_list_remove_ptr
+0 291
+
+fn=(952) free
+0 585018
+cfn=(954) szone_size
+calls=32501 0 
+0 2813268
+0 877527
+cfn=(956) szone_free_definite_size
+calls=32501 0 
+0 9537137
+
+fn=(956)
+0 1425401
+cfn=(808) append_int
+calls=27858 0 
+0 167148
+0 1518609
+cfn=(808)
+calls=4643 0 
+0 27858
+0 134704
+
+ob=(7)
+fl=(7)
+fn=(1512)
+0 126
+cfn=(675)
+calls=9 0 
+0 387
+0 81
+
+fn=(1496) __v2printf
+0 369
+cfn=(1498) __vfprintf
+calls=9 0 
+0 21648
+0 135
+
+fn=(1516)
+0 63
+cob=(10)
+cfi=(10)
+cfn=(1518)
+calls=9 0 
+0 45
+
+fn=(1494)
+0 369
+cfn=(675)
+calls=9 0 
+0 846
+0 576
+cfn=(1496)
+calls=9 0 
+0 22152
+0 45
+cfn=(675)
+calls=9 0 
+0 873
+0 171
+
+fn=(1498)
+0 261
+cfn=(675)
+calls=9 0 
+0 180
+0 8523
+cfn=(675)
+calls=45 0 
+0 7617
+0 1818
+cfn=(1506)
+calls=45 0 
+0 1116
+0 945
+cfn=(675)
+calls=9 0 
+0 873
+0 315
+
+ob=(12)
+fl=(12)
+fn=(956)
+0 399
+cfn=(1058)
+calls=19 0 
+0 418
+0 1317
+cfn=(1062)
+calls=3 0 
+0 69
+0 27
+cfn=(1076)
+calls=3 0 
+0 291
+0 249
+cfn=(1060) tiny_free_list_add_ptr
+calls=19 0 
+0 1824
+0 916749
+cfn=(1560)
+calls=21802 0 
+0 2092992
+0 387734
+cfn=(1558)
+calls=23227 0 
+0 1904614
+0 859231
+cob=(6)
+cfi=(6)
+cfn=(576)
+calls=32501 0 
+0 97503
+
+fn=(834) malloc
+0 390516
+cfn=(878)
+calls=32543 0 
+0 9344924
+0 260344
+
+fn=(884) tiny_malloc_from_free_list
+0 6736
+cfn=(1062)
+calls=13 0 
+0 299
+0 195
+cfn=(1060)
+calls=13 0 
+0 1256
+0 26
+
+fn=(880)
+0 162715
+cfn=(882) szone_malloc_should_clear
+calls=32543 0 
+0 8271005
+
+fn=(882)
+0 507137
+cfn=(808)
+calls=4685 0 
+0 28110
+0 84025
+cfn=(808)
+calls=4624 0 
+0 18496
+0 97812
+cfn=(884)
+calls=61 0 
+0 8512
+0 305
+cfn=(808)
+calls=61 0 
+0 244
+0 306560
+cfn=(808)
+calls=27858 0 
+0 167148
+0 413167
+cfn=(808)
+calls=4631 0 
+0 18524
+0 199709
+cfn=(1100) small_malloc_from_free_list
+calls=23227 0 
+0 5514899
+0 116135
+cfn=(808)
+calls=23227 0 
+0 92908
+0 697314
+
+fn=(1060)
+0 3080
+
+fn=(1100)
+0 3705333
+cfn=(1558)
+calls=21802 0 
+0 1787764
+0 21802
+
+fn=(808)
+0 65044
+cob=(6)
+cfi=(6)
+cfn=(570)
+calls=65044 0 
+0 325220
+0 32543
+cob=(6)
+cfi=(6)
+cfn=(576)
+calls=32543 0 
+0 97629
+
+fn=(954)
+0 2106282
+
+ob=(7)
+fl=(7)
+fn=(1520) funlockfile
+0 54
+cfn=(675)
+calls=9 0 
+0 27
+0 135
+cob=(5) /usr/lib/system/libsystem_pthread.dylib
+cfi=(5) ???
+cfn=(590) pthread_mutex_unlock
+calls=9 0 
+0 1467
+
+fn=(674)
+0 9
+cob=(5)
+cfi=(5)
+cfn=(1324) pthread_getspecific
+calls=9 0 
+0 18
+0 9
+cfn=(1490)
+calls=9 0 
+0 28434
+
+fn=(675)
+0 108
+cob=(6)
+cfi=(6)
+cfn=(606)
+calls=108 0 
+0 3306
+0 9
+cob=(5)
+cfi=(5)
+cfn=(562) pthread_mutex_lock
+calls=9 0 
+0 1224
+0 18
+cob=(5)
+cfi=(5)
+cfn=(586) pthread_self
+calls=18 0 
+0 36
+0 9
+cfn=(1500)
+calls=9 0 
+0 171
+0 9
+cfn=(1492)
+calls=9 0 
+0 1449
+
+ob=(12)
+fl=(12)
+fn=(954)
+0 279830
+
+ob=(7)
+fl=(7)
+fn=(675)
+0 9
+cfn=(1520)
+calls=9 0 
+0 1683
+0 9
+cfn=(1510)
+calls=9 0 
+0 864
+0 54
+cfn=(1508)
+calls=54 0 
+0 8436
+0 9
+cfn=(1514)
+calls=9 0 
+0 378
+
+ob=(12)
+fl=(12)
+fn=(954)
+0 427156
+
+ob=(21) /usr/lib/system/libsystem_m.dylib
+fl=(24) ???
+fn=(1414) frexp$fenv_access_off
+0 493
+
+fn=(1416) ldexp$fenv_access_off
+0 522
+
+fn=(1572) trunc$fenv_access_off
+0 15211978
+
+ob=(19) ./main
+fl=(21) ???
+fn=(1404) pow2roundup
+0 29
+cob=(20) /usr/local/Cellar/gsl/1.16/lib/libgsl.0.dylib
+cfi=(23) ???
+cfn=(1410) gsl_fcmp
+calls=29 0 
+0 1847
+0 19
+cob=(20)
+cfi=(23)
+cfn=(1528) gsl_integration_qags
+calls=19 0 
+0 793083317
+0 19
+cob=(20)
+cfi=(23)
+cfn=(1526) gsl_integration_workspace_alloc
+calls=19 0 
+0 43947
+0 19
+cob=(20)
+cfi=(23)
+cfn=(1556) gsl_integration_workspace_free
+calls=19 0 
+0 68245
+0 19
+cob=(20)
+cfi=(23)
+cfn=(1524) gsl_set_error_handler_off
+calls=19 0 
+0 133
+0 9
+cob=(7)
+cfi=(7)
+cfn=(1488)
+calls=9 0 
+0 28839
+0 42
+cob=(12)
+cfi=(12)
+cfn=(834)
+calls=42 0 
+0 11274
+
+fn=(1405) pow2roundup'2
+0 4624
+cob=(20)
+cfi=(23)
+cfn=(1529) gsl_integration_qags'2
+calls=4624 0 
+0 768349846
+0 4624
+cob=(20)
+cfi=(23)
+cfn=(1526)
+calls=4624 0 
+0 10293431
+0 4624
+cob=(20)
+cfi=(23)
+cfn=(1556)
+calls=4624 0 
+0 13888638
+0 2126783
+cob=(20)
+cfi=(23)
+cfn=(1552) gsl_pow_int
+calls=2126783 0 
+0 29774962
+0 4624
+cob=(20)
+cfi=(23)
+cfn=(1524)
+calls=4624 0 
+0 32368
+0 2126783
+cob=(20)
+cfi=(23)
+cfn=(1548) gsl_sf_legendre_Pl
+calls=2126783 0 
+0 91451669
+0 855987
+cob=(21)
+cfi=(24)
+cfn=(1572)
+calls=855987 0 
+0 1711974
+
+fl=(20) /Users/janner/Dropbox/Bachelorproject/Code/C/workspace.c
+fn=(1406) workspace_add_point
+65 18
++3 86
++1 192
+cfi=(21)
+cfn=(1404)
+calls=24 -69 
+* 1542
+* 53
++1 40
+cfi=(21)
+cfn=(1404)
+calls=5 -70 
+* 334
+* 10
++1 6
++2 22
+-5 88
++8 2
+cfi=(22) /Users/janner/Dropbox/Bachelorproject/Code/C/edge.c
+cfn=(1408) edge_matrix_expand
+calls=1 -46 
+* 16
++1 5
++4 10
++1 6
++1 12
+
+fn=(1454) workspace_add_leaf
+103 30
++1 30
++4 36
++1 54
+
+fn=(1444) workspace_add_tri
+85 30
++1 30
++4 36
++1 54
+
+fn=(1466) workspace_remove_leaf
+112 15
++2 3
++1 15
++1 24
++1 6
++1 3
++3 27
++1 21
++4 366
++1 870
+-1 348
++3 9
+
+fl=(29) /Users/janner/Dropbox/Bachelorproject/Code/C/pair.c
+fn=(1458) pair_szudzik
+15 60
++1 36
++1 30
++1 6
++1 36
++2 24
+
+fn=(1480) pair_cantor
+4 45
++1 117
++1 18
+
+fn=(1568) pair_invcantor
+8 5135922
++1 6847896
+cfi=(21)
+cfn=(1405)
+calls=855987 -9 
+* 2567961
+* 1711974
++1 6847896
++1 3423948
++1 4279935
++1 2567961
+
+fl=(19) /Users/janner/Dropbox/Bachelorproject/Code/C/main.c
+fn=(1400) main
+cfi=(30) /Users/janner/Dropbox/Bachelorproject/Code/C/treegen.c
+cfn=(1472) treegen_hp
+calls=0 19 
+49 793247841
+
+ob=(20)
+fl=(23)
+fn=(1526)
+0 60359
+cfn=(1412) haar_init
+calls=4643 0 
+0 606551
+0 27858
+cfn=(1412)
+calls=4643 0 
+0 626798
+0 32501
+cfn=(1412)
+calls=4643 0 
+0 1851290
+0 27858
+cfn=(1412)
+calls=4643 0 
+0 1805144
+0 32501
+cfn=(1412)
+calls=4643 0 
+0 1804606
+0 32501
+cfn=(1412)
+calls=4643 0 
+0 1758470
+0 27858
+cfn=(1412)
+calls=4643 0 
+0 1564152
+0 78931
+
+fn=(1410)
+0 342
+cfn=(1412)
+calls=13 0 
+0 234
+0 48
+cfn=(1412)
+calls=16 0 
+0 288
+0 87
+cfn=(1412)
+calls=29 0 
+0 551
+0 297
+
+fn=(1412)
+0 27858
+cob=(12)
+cfi=(12)
+cfn=(952)
+calls=27858 0 
+0 12746165
+0 29
+cob=(21)
+cfi=(24)
+cfn=(1414)
+calls=29 0 
+0 493
+0 29
+cob=(21)
+cfi=(24)
+cfn=(1416)
+calls=29 0 
+0 522
+0 32501
+cob=(12)
+cfi=(12)
+cfn=(834)
+calls=32501 0 
+0 9984510
+0 65534
+cob=(21)
+cfi=(24)
+cfn=(1572)
+calls=65534 0 
+0 13500004
+
+fn=(1524)
+0 32501
+
+fn=(1556)
+0 41787
+cfn=(1412)
+calls=4643 0 
+0 1049552
+0 9286
+cfn=(1412)
+calls=4643 0 
+0 2219029
+0 9286
+cfn=(1412)
+calls=4643 0 
+0 2376353
+0 9286
+cfn=(1412)
+calls=4643 0 
+0 2376076
+0 9286
+cfn=(1412)
+calls=4643 0 
+0 2376650
+0 9286
+cfn=(1412)
+calls=4643 0 
+0 2376363
+0 27858
+cob=(12)
+cfi=(12)
+cfn=(952)
+calls=4643 0 
+0 1066785
+
+fn=(1548)
+0 10633915
+cfn=(1550) gsl_sf_legendre_Pl_e
+calls=2126783 0 
+0 68057056
+0 12760698
+
+fn=(1530) qags
+0 855
+cfn=(1532) gsl_integration_qk21
+calls=19 0 
+0 44972111
+0 21946
+cfn=(1532)
+calls=101 0 
+0 334836733
+0 800
+cfn=(1532)
+calls=100 0 
+0 413231698
+0 19079
+
+fn=(1531) qags'2
+0 208080
+cfn=(1533) gsl_integration_qk21'2
+calls=4624 0 
+0 34220773
+0 14710419
+
+ob=(19)
+fl=(19)
+fn=(1544) f
+15 10633915
++1 9542329
++1 4253566
++3 1091586
++2 6380346
+
+fl=(31) /Users/janner/Dropbox/Bachelorproject/Code/C/error.c
+fn=(1484) error_gamma
+84 63
++1 27
+cfi=(32) /Users/janner/Dropbox/Bachelorproject/Code/C/pkd.c
+cfn=(1486) pkd_norm
+calls=9 -77 
+* 162
+* 27
++1 90
++1 108
+cfi=(21)
+cfn=(1404)
+calls=9 -87 
+* 28848
+* 90
++1 108
+cfn=(1522) integrate
+calls=9 -41 
+* 435818111
+* 60
+
+fn=(1564) error_s
+110 23155
++1 4210
++1 8420
++1 10525
+cfn=(1523) integrate'2
+calls=2105 -66 
+* 357164850
+* 6312
+
+fn=(1522)
+47 133
++2 19
+cfi=(21)
+cfn=(1404)
+calls=19 -49 
+* 152
+* 19
++1 76
++1 38
+cfi=(21)
+cfn=(1404)
+calls=19 -51 
+* 43966
+* 133
++1 76
+cfi=(21)
+cfn=(1404)
+calls=19 -52 
+* 793083336
++1 57
+cfi=(21)
+cfn=(1404)
+calls=19 -53 
+* 68264
++5 76
+
+fn=(1523)
+47 32368
++2 4624
+cfi=(21)
+cfn=(1405)
+calls=4624 -49 
+* 36992
+* 4624
++1 18496
++1 9248
+cfi=(21)
+cfn=(1405)
+calls=4624 -51 
+* 10298055
+* 32368
++1 18496
+cfi=(21)
+cfn=(1405)
+calls=4624 -52 
+* 768354470
++1 13872
+cfi=(21)
+cfn=(1405)
+calls=4624 -53 
+* 13893262
++5 18496
+
+fn=(1566) error_t
+92 5135922
++1 855987
++1 3423948
++1 5991909
+cfn=(1540) F
+calls=855987 -55 
+* 22255662
+* 1711974
++1 5991909
+cfi=(26) /Users/janner/Dropbox/Bachelorproject/Code/C/tri.c
+cfn=(1542) tri_ref2t
+calls=855987 -51 
+* 55639155
+* 1711974
++2 1711974
++2 11127831
++1 1711974
+cfi=(29)
+cfn=(1568)
+calls=855987 -93 
+* 33383493
++1 11127831
+cfi=(32)
+cfn=(1546) pkd_eval_square
+calls=855987 -51 
+* 106998375
+* 4279935
+-2 3423948
++5 2567961
+cfi=(19)
+cfn=(1544)
+calls=855987 -90 
+* 12839802
+* 3423944
++1 5991902
+
+fn=(1478) construct_p_n
+117 54
++2 66
++1 113
++1 27
+cfi=(29)
+cfn=(1480)
+calls=9 4 
+* 180
++1 36
+cfi=(28) /Users/janner/Dropbox/Bachelorproject/Code/C/tree.c
+cfn=(1482) tree_get_gamma
+calls=9 +33 
+* 135
+* 9
++1 36
++1 171
+cfn=(1484)
+calls=9 -40 
+* 435847694
+* 40
+cfi=(28)
+cfn=(1562) tree_set_gamma
+calls=10 +17 
+* 190
++1 10
++3 10
+-8 40
++9 10
+-10 40
++11 30
+
+fn=(1536) gamma_s
+75 27709
++1 5038
++1 10076
++1 12595
+cfn=(1523)
+calls=2519 -31 
+* 435570521
+* 7560
+
+fn=(1476) error
+135 54
++1 153
++2 90
+cfn=(1478)
+calls=9 -21 
+* 435848891
++3 60
++2 200
++1 120
+cfn=(1522)
+calls=10 -97 
+* 357378234
+* 27
++2 36
+
+fn=(1538) gamma_t
+63 6353980
++1 1270796
++1 5083184
++1 6353980
+cfn=(1540)
+calls=1270796 -26 
+* 33040696
+* 2541592
++1 8895572
+cfi=(26)
+cfn=(1542)
+calls=1270796 -22 
+* 82601740
+* 2541592
++1 3812388
+cfi=(19)
+cfn=(1544)
+calls=1270796 -53 
+* 19061940
+* 1270796
++1 11437164
+cfi=(32)
+cfn=(1546)
+calls=1270796 -18 
+* 158849500
+* 3812388
++1 8895572
+
+fn=(1540)
+40 10633915
++1 27648179
++1 17014264
+
+fl=(30)
+fn=(1472)
+22 12
++1 3
++3 15
++1 33
++1 9
++1 9
+cfi=(28)
+cfn=(1474) hptree_get_e
+calls=3 +84 
+* 145581970
+* 12
++1 18
+cfi=(28)
+cfn=(1574) hptree_set_ehp
+calls=3 +44 
+* 99
+* 3
++1 18
+cfi=(28)
+cfn=(1576) hptree_set_tehp
+calls=3 +67 
+* 99
++1 18
++1 9
++5 9
++2 9
+cfi=(28)
+cfn=(1462) tree_subdivide
+calls=3 184 
+* 17925
++2 12
++5 27
++1 27
++4 18
++1 27
++1 18
++1 18
++1 18
+cfi=(28)
+cfn=(1474)
+calls=6 +57 
+* 647646327
+* 24
+cfn=(1578) inverror
+calls=6 -42 
+* 128
+* 24
++1 54
+cfi=(28)
+cfn=(1474)
+calls=6 +56 
+* 270
+* 24
+cfi=(28)
+cfn=(1574)
+calls=6 +17 
+* 198
+* 6
++1 36
+cfi=(28)
+cfn=(1576)
+calls=6 +40 
+* 198
++1 36
++1 18
+-7 24
++12 6
++4 9
++1 9
++1 3
+-49 12
+
+fn=(1578)
+14 30
++1 52
++1 28
++1 18
+
+fl=(28)
+fn=(1462)
+184 15
++1 6
+cfn=(1464) tree_is_leaf
+calls=3 -22 
+* 30
+* 27
++3 18
++1 30
++1 36
++1 24
++1 12
+cfi=(20)
+cfn=(1406)
+calls=3 65 
+* 2442
+* 3
++3 21
+cfi=(26)
+cfn=(1440) tri_create
+calls=3 10 
+* 1485
+* 3
++1 21
+cfi=(26)
+cfn=(1440)
+calls=3 10 
+* 1485
+* 3
++1 9
+cfi=(20)
+cfn=(1444)
+calls=3 85 
+* 75
+* 3
++1 9
+cfi=(20)
+cfn=(1444)
+calls=3 85 
+* 75
+* 6
++3 30
+cfn=(1448) tree_create
+calls=3 38 
+* 5031
+* 6
++1 24
+cfn=(1448)
+calls=3 38 
+* 4551
+* 3
++1 9
++1 9
++3 9
+cfi=(20)
+cfn=(1466)
+calls=3 -95 
+* 1707
++1 9
+cfi=(20)
+cfn=(1454)
+calls=3 103 
+* 75
++1 12
+cfi=(20)
+cfn=(1454)
+calls=3 103 
+* 75
++3 27
+cfi=(22)
+cfn=(1456) edge_set
+calls=3 24 
+* 105
++1 21
+cfi=(22)
+cfn=(1456)
+calls=3 24 
+* 105
++1 24
+cfi=(22)
+cfn=(1456)
+calls=3 24 
+* 105
++1 21
+cfi=(22)
+cfn=(1456)
+calls=3 24 
+* 105
+
+ob=(20)
+fl=(23)
+fn=(1531)
+0 5158706
+cfn=(1533)
+calls=48326 0 
+0 353690146
+0 386608
+cfn=(1533)
+calls=48326 0 
+0 352051577
+0 7900417
+
+fn=(1534) gsl_integration_qk
+0 4840
+cob=(19)
+cfi=(31)
+cfn=(1564)
+calls=101 110 
+0 17062976
+cob=(19)
+cfi=(31)
+cfn=(1536)
+calls=119 75 
+0 20563319
+0 9061
+cob=(19)
+cfi=(31)
+cfn=(1564)
+calls=101 110 
+0 14681686
+cob=(19)
+cfi=(31)
+cfn=(1536)
+calls=120 75 
+0 19966513
+0 9691
+cob=(19)
+cfi=(31)
+cfn=(1564)
+calls=401 110 
+0 62241641
+cob=(19)
+cfi=(31)
+cfn=(1536)
+calls=480 75 
+0 79994500
+0 5510
+cob=(19)
+cfi=(31)
+cfn=(1564)
+calls=502 110 
+0 92920026
+cob=(19)
+cfi=(31)
+cfn=(1536)
+calls=600 75 
+0 107215259
+0 35007
+cob=(19)
+cfi=(31)
+cfn=(1564)
+calls=100 110 
+0 15219514
+cob=(19)
+cfi=(31)
+cfn=(1536)
+calls=120 75 
+0 20209986
+0 7920
+cob=(19)
+cfi=(31)
+cfn=(1564)
+calls=400 110 
+0 61665579
+cob=(19)
+cfi=(31)
+cfn=(1536)
+calls=480 75 
+0 80123657
+0 5500
+cob=(19)
+cfi=(31)
+cfn=(1564)
+calls=500 110 
+0 93426050
+cob=(19)
+cfi=(31)
+cfn=(1536)
+calls=600 75 
+0 107560265
+0 62895
+cfn=(1412)
+calls=185 0 
+0 38295
+0 4472
+
+fn=(1535) gsl_integration_qk'2
+0 2228072
+cob=(19)
+cfi=(31)
+cfn=(1566)
+calls=40762 92 
+0 14348224
+cob=(19)
+cfi=(31)
+cfn=(1538)
+calls=60514 63 
+0 16943920
+0 4152316
+cob=(19)
+cfi=(31)
+cfn=(1566)
+calls=40762 92 
+0 14348224
+cob=(19)
+cfi=(31)
+cfn=(1538)
+calls=60514 63 
+0 16943920
+0 4456122
+cob=(19)
+cfi=(31)
+cfn=(1566)
+calls=163046 92 
+0 57392178
+cob=(19)
+cfi=(31)
+cfn=(1538)
+calls=242056 63 
+0 67775680
+0 2531885
+cob=(19)
+cfi=(31)
+cfn=(1566)
+calls=203807 92 
+0 71740064
+cob=(19)
+cfi=(31)
+cfn=(1538)
+calls=302570 63 
+0 84719600
+0 16102779
+cob=(19)
+cfi=(31)
+cfn=(1566)
+calls=40761 92 
+0 14347872
+cob=(19)
+cfi=(31)
+cfn=(1538)
+calls=60514 63 
+0 16943920
+0 3645909
+cob=(19)
+cfi=(31)
+cfn=(1566)
+calls=163044 92 
+0 57391488
+cob=(19)
+cfi=(31)
+cfn=(1538)
+calls=242057 63 
+0 67775960
+0 2531880
+cob=(19)
+cfi=(31)
+cfn=(1566)
+calls=203805 92 
+0 71739360
+cob=(19)
+cfi=(31)
+cfn=(1538)
+calls=302571 63 
+0 84719880
+0 28856075
+cfn=(1412)
+calls=65349 0 
+0 13527243
+0 1862921
+
+fn=(1528)
+0 95
+cfn=(1530)
+calls=19 0 
+0 793083222
+
+fn=(1529)
+0 23120
+cfn=(1531)
+calls=4624 0 
+0 768326726
+
+fn=(1550)
+0 68057056
+
+fn=(1532)
+0 4840
+cfn=(1534)
+calls=220 0 
+0 793034162
+0 1540
+
+fn=(1533)
+0 2228072
+cfn=(1535)
+calls=101276 0 
+0 737025492
+0 303828
+
+ob=(19)
+fl=(28)
+fn=(1462)
+218 9
++7 6
++1 9
+
+fn=(1450) hp_create
+14 24
++1 6
+cfi=(21)
+cfn=(1404)
+calls=6 -15 
+* 1494
+* 24
++1 12
++1 12
++1 12
++2 6
+cfi=(21)
+cfn=(1404)
+calls=6 -20 
+* 1371
+* 30
++1 18
++1 18
++1 12
++2 6
+cfi=(21)
+cfn=(1404)
+calls=6 -25 
+* 1356
+* 30
++1 18
++1 18
++1 12
++2 6
+cfi=(21)
+cfn=(1404)
+calls=6 -30 
+* 1356
+* 24
++1 18
++1 18
++1 12
++2 24
+
+fn=(1576)
+98 63
++1 90
++2 45
++9 72
++1 27
+
+fn=(1448)
+38 60
++1 12
+cfi=(21)
+cfn=(1404)
+calls=6 -39 
+* 1506
+* 12
++1 18
++1 18
++2 18
++1 18
++1 18
++1 12
++1 6
+cfi=(21)
+cfn=(1404)
+calls=6 -47 
+* 1809
+* 18
++1 18
++1 18
++1 12
++1 12
++2 12
++1 6
+cfn=(1450)
+calls=6 -40 
+* 5937
+* 12
++1 6
++7 24
+
+fn=(1482)
+155 45
++1 45
++1 18
++4 27
+
+fn=(1574)
+74 63
++1 90
++2 45
++9 72
++1 27
+
+fn=(1464)
+163 9
++1 21
+
+fn=(1474)
+113 90
++1 150
++2 75
++7 30
++2 135
++1 54
++2 36
+cfi=(31)
+cfn=(1476)
+calls=9 +7 
+* 793227865
+* 72
++2 60
+
+fn=(1562)
+141 70
++1 40
++10 50
++1 30
+
+fl=(22)
+fn=(1408)
+30 4
++1 5
++11 4
++1 3
+
+fn=(1456)
+24 96
++2 48
+cfi=(29)
+cfn=(1458)
+calls=12 -11 
+* 192
++1 48
++1 36
+
+fl=(26)
+fn=(1442) tri_vol
+27 24
++1 60
++1 60
++1 66
++1 144
+
+fn=(1542)
+45 12760698
++1 19141047
++1 19141047
++1 19141047
++3 51042792
++1 17014264
+
+fn=(1440)
+10 48
++1 12
+cfi=(21)
+cfn=(1404)
+calls=6 -11 
+* 2424
+* 6
++1 18
++1 18
++1 18
++1 18
+cfn=(1442)
+calls=6 +12 
+* 354
+* 30
++4 24
+
+fl=(32)
+fn=(1554) jacobi
+14 12760698
++1 23394613
++4 8507132
++1 4253566
++29 8507132
+
+ob=(20)
+fl=(23)
+fn=(1533)
+0 405104
+
+ob=(19)
+fl=(32)
+fn=(1486)
+8 54
++1 108
+
+ob=(20)
+fl=(23)
+fn=(1552)
+0 29774962
+
+ob=(19)
+fl=(32)
+fn=(1546)
+51 14887481
++1 6380349
+cfi=(21)
+cfn=(1405)
+calls=2126783 -52 
+* 93578452
+* 10633915
++1 10633915
+cfi=(21)
+cfn=(1405)
+calls=2126783 -53 
+* 31901745
+* 10633915
++1 14887481
+cfn=(1554)
+calls=2126783 -40 
+* 57423141
+* 2126783
++1 12760698
+
+ob=(5)
+fl=(5)
+fn=(566) _pthread_mutex_check_init
+0 324
+
+fn=(586)
+0 36
+
+fn=(562)
+0 18
+cfn=(564) _pthread_mutex_lock
+calls=9 0 
+0 1206
+
+fn=(1324)
+0 18
+
+fn=(564)
+0 99
+cfn=(566)
+calls=9 0 
+0 162
+0 54
+cfn=(578) pthread_threadid_np
+calls=9 0 
+0 225
+0 297
+cfn=(568) thread_start
+calls=9 0 
+0 54
+0 315
+
+fn=(568)
+0 18
+cob=(6)
+cfi=(6)
+cfn=(584)
+calls=18 0 
+0 90
+
+fn=(592) __mtx_droplock
+0 675
+cfn=(568)
+calls=9 0 
+0 54
+0 288
+
+fn=(578)
+0 225
+
+fn=(590)
+0 72
+cfn=(566)
+calls=9 0 
+0 162
+0 90
+cfn=(592)
+calls=9 0 
+0 1017
+0 126
+
+ob=(1) /usr/lib/dyld
+fl=(1) ???
+fn=(0) _dyld_start
+cob=(19)
+cfi=(19)
+cfn=(1400)
+calls=0 24 
+0 793247841
+
+totals: 793247841

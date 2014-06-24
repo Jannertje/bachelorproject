@@ -18,4 +18,4 @@ valgrind: main
 	valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes --dsymutil=yes ./main
 
 qcachegrind: main
-	valgrind --tool=callgrind -v --dump-every-bb=100000000 ./main
+	valgrind --tool=callgrind -v --dump-every-bb=1000000000 ./main

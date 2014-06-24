@@ -114,13 +114,16 @@ double error_s( double s, void *params) {
 }
 
 /* find gamma_{j,k} for j \in \{0, \ldots, n\} and k \in \{0, \ldots, n-j\} */
-void construct_p_n( workspace *w, tri *t, int n, double *coeffs) {
+void construct_p_n( workspace *w, tree *node, int n) {
   int j, k, l;
   for( j = 0; j < n; j++) {
     for( k = 0; k < n-j; k++) {
       pair_cantor( j, k, &l);
-      coeffs[l] = error_gamma( w, t, j, k);
-      //printf("gamma: %i %i %g\n", j, k, coeffs[l]);
+      double gamma = tree_get_gamma( w, node, l);
+      if( gamma != gamma) { //NaN
+        double gamma = error_gamma( w, w->tris[node->i], j, k);
+        tree_set_gamma( w, node, l, gamma);
+      }
     }
   }
 }
@@ -131,19 +134,12 @@ void construct_p_n( workspace *w, tri *t, int n, double *coeffs) {
 double error( workspace *w, tree *node, int n) {
   assert( n > 0);
   //find polynomial
-  double *coeffs = malloc((n+1)*n/2 * sizeof( double));
-  construct_p_n( w, w->tris[node->i], n, coeffs);
-
-  if( node->hp) {
-    hptree_set_coeffs( w, node, n, coeffs);
-  } else {
-    node->info.h->coeffs = coeffs;
-  }
+  construct_p_n( w, node, n);
 
   //integrate
   tri *t = w->tris[node->i];
   error_s_p params = { .w = w, .t = w->tris[node->i], 
-                       .coeffs = coeffs, .l = (n+1)*n/2};
+                       .coeffs = node->gammas, .l = (n+1)*n/2};
   double e = t->vol/4.0*integrate( &error_s, &params, -1, 1);
   //fprintf( stderr, "error %i\n", n);
   return e;

@@ -18,9 +18,8 @@ void hptree_set_tehp( workspace *w, tree *node, int r, double val);
 double hptree_get_e( workspace *w, tree *node, int r);
 double htree_get_e( workspace *w, tree *node);
 
-void hptree_set_coeffs( workspace *w, tree *node, int r, double *coeffs);
-int hptree_get_coeffs( workspace *w, tree *node, int r, int *len, double **coeffs);
-int htree_get_coeffs( workspace *w, tree *node, int *len, double **coeffs);
+void tree_set_gamma( workspace *w, tree *node, int i, double gamma);
+double tree_get_gamma( workspace *w, tree *node, int i);
 
 int tree_is_on_edge( workspace *w, tree *node);
 int tree_has_hanging_vertex( workspace *w, tree *node);

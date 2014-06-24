@@ -206,20 +206,18 @@ void workspace_print_plot( workspace *w) {
     tri *t = w->tris[w->leaves[i]->i];
     printf("%i %i %i\n", t->p[0], t->p[1], t->p[2]);
     if( w->leaves[i]->hp) {
-      printf("%i", w->leaves[i]->info.hp->r);
-      int k;
-      double *coeffs;
-      hptree_get_coeffs( w, w->leaves[i], w->leaves[i]->info.hp->r, &k, &coeffs);
+      int r = w->leaves[i]->info.hp->r;
+      printf("%i", r);
+      int k = (r+1)*r/2;
       for( j = 0; j < k; j++) {
-        printf(" %g", coeffs[j]);
+        printf(" %g", tree_get_gamma( w, w->leaves[i], j));
       }
     } else {
-      printf("%i", w->leaves[i]->info.h->r);
-      int k;
-      double *coeffs;
-      htree_get_coeffs( w, w->leaves[i], &k, &coeffs);
+      int r = w->leaves[i]->info.h->r;
+      printf("%i", r);
+      int k = (r+1)*r/2;
       for( j = 0; j < k; j++) {
-        printf(" %g", coeffs[j]);
+        printf(" %g", tree_get_gamma( w, w->leaves[i], j));
       }
     }
     printf("\n");
