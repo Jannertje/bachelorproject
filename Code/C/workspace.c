@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <string.h>
 #include "workspace.h"
+#include "tri.h"
 #include "tree.h"
 #include "edge.h"
 
@@ -11,6 +12,10 @@
 
 workspace *workspace_init( void) {
   workspace *w = malloc( sizeof( workspace));
+
+  w->npoly = 0;
+  w->is_matched = 0;
+  w->is_conform = 0;
 
   w->points = malloc( 2*sizeof( point));
   w->npoints = 0;
@@ -29,14 +34,32 @@ workspace *workspace_init( void) {
   w->lenleaves = 2;
 
   int i;
-  w->edges = malloc( 4*sizeof( int));
+  w->edges = malloc( 4*sizeof( tree *));
   for( i = 0; i < 4; i++) {
-    w->edges[i] = -1;
+    w->edges[i] = NULL;
   }
   w->nedges = 0;
   w->lenedges = 2;
 
   return w;
+}
+
+void workspace_free( workspace *w) {
+  int i;
+  free( w->points);
+
+  for( i = 0; i < w->ntris; i++) {
+    tri_free( w->tris[i]);
+  }
+  free( w->tris);
+
+  for( i = 0; i < w->nroots; i++) {
+    tree_free_deep( w->roots[i]);
+  }
+  free( w->roots);
+  free( w->leaves);
+  free( w->edges);
+  free( w);
 }
 
 int workspace_add_point( workspace *w, point p) {
@@ -123,11 +146,25 @@ void workspace_print_tris( workspace *w) {
   printf("\n");
 }
 
+void workspace_print_roots( workspace *w) {
+  int i;
+  printf("roots (n = %i, len = %i)\n", w->nroots, w->lenroots);
+  for( i = 0; i < w->nroots; i++) {
+    printf("%i: tri=%i\n", i, w->roots[i]->i);
+  }
+  printf("\n");
+}
+
 void workspace_print_leaves( workspace *w) {
   int i;
   printf("leaves (n = %i, len = %i)\n", w->nleaves, w->lenleaves);
   for( i = 0; i < w->nleaves; i++) {
-    printf("%i: tri index %i\n", i, w->leaves[i]->i);
+    printf("%i: tri=%i", i, w->leaves[i]->i);
+    if( w->leaves[i]->hp) {
+      printf(" r=%i, te=%g\n", w->leaves[i]->info.hp->r, w->leaves[i]->info.hp->te);
+    } else {
+      printf(" r=%i, te=%g, e=%g\n", w->leaves[i]->info.h->r, w->leaves[i]->info.h->te, w->leaves[i]->info.h->e);
+    }
   }
   printf("\n");
 }
@@ -135,13 +172,14 @@ void workspace_print_leaves( workspace *w) {
 void workspace_print_edge_matrix( workspace *w) {
   int i, j;
   printf("edge matrix (n = %i, len = %i)\n", w->nedges, w->lenedges);
-  for( i = 0; i < w->nedges * w->nedges; i++) {
-    printf("%i ", w->edges[i]);
-  }
-  printf("\n");
   for( i = 0; i < w->nedges; i++) {
     for( j = 0; j < w->nedges; j++) {
-      printf("%4i ", edge_get_leaf( w->edges, i, j));
+      tree *leaf = edge_get( w->edges, i, j);
+      if( leaf == NULL) {
+        printf("%4i ", -1);
+      } else {
+        printf("%4i ", leaf->i);
+      }
     }
     printf("\n");
   }
@@ -152,7 +190,39 @@ void workspace_print( workspace *w) {
   printf("=================\n");
   workspace_print_points( w);
   workspace_print_tris( w);
+  workspace_print_roots( w);
   workspace_print_leaves( w);
   workspace_print_edge_matrix( w);
   printf("=================\n");
+}
+
+void workspace_print_plot( workspace *w) {
+  int i, j;
+  for( i = 0; i < w->npoints; i++) {
+    printf("%g %g\n", w->points[i].x, w->points[i].y);
+  }
+  printf("\n");
+  for( i = 0; i < w->nleaves; i++) {
+    tri *t = w->tris[w->leaves[i]->i];
+    printf("%i %i %i\n", t->p[0], t->p[1], t->p[2]);
+    if( w->leaves[i]->hp) {
+      printf("%i", w->leaves[i]->info.hp->r);
+      int k;
+      double *coeffs;
+      hptree_get_coeffs( w, w->leaves[i], w->leaves[i]->info.hp->r, &k, &coeffs);
+      for( j = 0; j < k; j++) {
+        printf(" %g", coeffs[j]);
+      }
+    } else {
+      printf("%i", w->leaves[i]->info.h->r);
+      int k;
+      double *coeffs;
+      htree_get_coeffs( w, w->leaves[i], &k, &coeffs);
+      for( j = 0; j < k; j++) {
+        printf(" %g", coeffs[j]);
+      }
+    }
+    printf("\n");
+  }
+  printf("\n");
 }

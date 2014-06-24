@@ -1,4 +1,6 @@
 #pragma once
+#include "main.h"
+
 typedef struct point {
   double x, y;
 } point;
@@ -8,16 +10,44 @@ typedef struct tri {
   double vol;
 } tri;
 
+typedef struct hp {
+  int r;
+  double te, q;
+
+  double *e;
+  int lene;
+
+  double *ehp;
+  int lenehp;
+
+  double *tehp;
+  int lentehp;
+
+  double **coeffs;
+  int lencoeffs;
+} hp;
+
+typedef struct h {
+  int r;
+  double e, te;
+  double *coeffs;
+} h;
+
 typedef struct tree {
   int i; //index in tris array
   struct tree *parent, *left, *right;
+  struct tree *t; //to overcome circular dependency
+
+  union info {
+    hp *hp;
+    h *h;
+  } info;
+  int hp;
 } tree;
 
-typedef struct edge_matrix_element {
-  int tri, leaf;
-} edge_matrix_element;
-
 typedef struct workspace {
+  int npoly;
+  int is_matched, is_conform;
   point *points;
   int npoints, lenpoints;
 
@@ -30,7 +60,7 @@ typedef struct workspace {
   tree **leaves;
   int nleaves, lenleaves;
 
-  int *edges;
+  tree **edges;
   int nedges, lenedges;
 } workspace;
 

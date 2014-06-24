@@ -9,15 +9,6 @@ double pkd_norm( int j, int k) {
   return sqrt(2.0/((2*j+1)*(j+k+1)));
 }
 
-int factorial( int n) {
-  int retval = 1;
-  int i;
-  for( i = n; i > 1; --i) {
-    retval *= i;
-  }
-  return retval;
-}
-
 //find P_k^(a, 0)(x) for x \in [-1,1]
 //method same as legendre
 double jacobi( int k, double a, double x) {
@@ -31,16 +22,6 @@ double jacobi( int k, double a, double x) {
   else if(k == 1) {
     return ((a+2)*x+a)/2;
   }
-  /*
-  else if(x == 1.0) {
-    return (double) factorial(a+k)/(factorial(a)*factorial(k));
-  }
-  else if(x == -1.0) {
-    double res = (double) factorial(a+k)/(factorial(a)*factorial(k));
-    res *= ( GSL_IS_ODD(k) ? -1.0 : 1.0 );
-    return res;
-  }
-  */
   else if(k < 100000) {
     //hier zit de fout
     /* upward recurrence */
@@ -67,18 +48,11 @@ double jacobi( int k, double a, double x) {
   }
 }
 
-double eval( int j, int k, point p) {
-  //point q = { 0.5*(1.0+p.x)*(1.0-p.y) - 1.0, p.y};
-  point q = p;
-  //point q = {2.0*(1.0+p.x)/(1.0-p.y) - 1, p.y};
-  double leg = gsl_sf_legendre_Pl( j, 2*q.x - 1);
-  double pwr = gsl_pow_int( 1-q.y, j);
-  double jac = jacobi( k, 2.0*j+1.0, 2*q.y - 1);
+double pkd_eval_square( int j, int k, point p) {
+  double leg = gsl_sf_legendre_Pl( j, p.x);
+  double pwr = gsl_pow_int( (1.0-p.y)/2.0, j);
+  double jac = jacobi( k, 2.0*j+1.0, p.y);
   return leg*pwr*jac;
-}
-
-double pkd_eval( int j, int k, point p) {
-  return eval( j, k, p);
 }
 
 /*

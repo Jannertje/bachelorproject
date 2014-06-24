@@ -1,142 +1,181 @@
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_errno.h>
+#include <assert.h>
 #include <stdio.h>
 #include "tri.h"
+#include "types.h"
+#include "workspace.h"
+#include "partition.h"
+#include "tree.h"
 #include "pkd.h"
 #include "pair.h"
+#include "main.h"
 
 #define ERR 1E-5
 
-typedef struct gamma_s {
-  tri *node;
+typedef struct gamma_s_p {
+  workspace *w;
+  tri *t;
   double norm;
   int j, k;
-} gamma_s;
+} gamma_s_p;
 
-typedef struct gamma_y_s {
-  double x;
-  gamma_s *s;
-} gamma_y_s;
+typedef struct gamma_t_p {
+  double s;
+  gamma_s_p *p;
+} gamma_t_p;
 
-typedef struct error_s {
-  tri *node;
+typedef struct error_s_p {
+  workspace *w;
+  tri *t;
   double *coeffs;
   int l;
-} error_s;
+} error_s_p;
 
-typedef struct error_y_s {
-  error_s *s;
-  double x;
-} error_y_s;
+typedef struct error_t_p {
+  double s;
+  error_s_p *p;
+} error_t_p;
 
-point a = {0, 0};
-point b = {1, 0};
-point c = {0, 1};
-tri *node;
-
-double f( double x, double y) {
-  return 1;
+point F( point st) {
+  point Fst = {.x = (1.0-st.y)*(1.0+st.x)/4.0, .y = (st.y + 1.0)/2.0};
+  return Fst;
 }
 
 /* simple wrapper around gsl_integrate_* */
 double integrate( double (* function)( double x, void *params), void *params,
                   double a, double b) {
-  gsl_function F = {.function = function, .params = params};
-  /*
-  gsl_integration_workspace *w = gsl_integration_workspace_alloc( 1000);
-  gsl_integration_qags( &F, -1.0, x, ERR, 0.0, 1000, w, &res, &err);
-  gsl_integration_workspace_free( w);
-  */
   double res, err;
+  gsl_set_error_handler_off();
+  gsl_function F = {.function = function, .params = params};
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc( 1000);
+  gsl_integration_qags( &F, a, b, ERR, 0.0, 1000, w, &res, &err);
+  gsl_integration_workspace_free( w);
+  /*
   size_t neval;
   gsl_integration_qng( &F, a, b, ERR, 0.0, &res, &err, &neval);
+  */
   return res;
 }
 
-/* compute f(G(x,y)) * Q_{j,k}(x,y),
+/* compute (1-t)*f(G(F(s,t)))*Q_{j,k}^\square(s,t)
  * in other words, the integrand of gamma_{j,k}. */
-double gamma_y( double y, void *params) {
-  gamma_y_s *p = (gamma_y_s *) params;
-  point q = {.x = p->x, .y = y};
-  point r = tri_ref2node( p->s->node, q);
-  point Fr = {.x = r.x*(1-r.y), r.y};
-  point Fq = {.x = q.x*(1-q.y), q.y};
-  double fr = f(r.x, r.y);
-  double Qp = pkd_eval( p->s->j, p->s->k, q);
-  return fr * Qp*(1-y);
+double gamma_t( double t, void *params) {
+  gamma_t_p *p = (gamma_t_p *) params;
+  point st = {.x = p->s, .y = t};
+  point Fst = F( st);
+  point GFst = tri_ref2t( p->p->w, p->p->t, Fst);
+  double fr = f(GFst.x, GFst.y);
+  double Qp = pkd_eval_square( p->p->j, p->p->k, st);
+  return fr * Qp*(1-t);
 }
 
-/* compute \int_0^{1-x} gamma_y( x, y) dy,
+/* compute \int_{-1}^1 gamma_y( s, t) dt,
  * in other words, the inner integral of gamma_{j,k}. */
-double gamma_x( double x, void *params) {
-  gamma_s *p = (gamma_s *) params;
-  gamma_y_s p2 = {.s = p, .x = x};
-  return integrate( &gamma_y, &p2, 0, 1);
+double gamma_s( double s, void *params) {
+  gamma_s_p *p = (gamma_s_p *) params;
+  gamma_t_p p2 = {.p = p, .s = s};
+  return integrate( &gamma_t, &p2, -1, 1);
 }
 
 /* compute \int_0^1 gamma_x( x, y) dx,
  * in other words, find the outer integral of gamma_{j,k}
  * which is needed for the polynomial of best approximation */
-double error_gamma( int j, int k) {
+double error_gamma( workspace *w, tri *t, int j, int k) {
   double norm = pkd_norm( j, k);
-  gamma_s params = { .node = node, .norm = norm, .j = j, .k = k};
-  double n = pkd_norm( j, k);
-  return 2*node->vol*integrate( &gamma_x, &params, 0, 1)/(n*n);
+  gamma_s_p params = { .w = w, .t = t, .norm = norm, .j = j, .k = k};
+  fprintf( stderr, "gamma %i %i %i: %i %i\n", t->p[0], t->p[1], t->p[2], j, k);
+  return (2.0*j+1.0)*(j+k+1.0)/4.0 * integrate( &gamma_s, &params, -1, 1);
 }
 
-//TODO: extend to other triangles
-/* compute [f(x,y) - p_n(G^{-1}(x,y))]^2 */
-double error_y( double y, void *params) {
-  error_y_s *p = (error_y_s *) params;
-  point q = {.x = p->x, .y = y};
-  point r = tri_ref2node( p->s->node, q);
+/* compute (1-t)[f(G(F(s,t))) - \sum \sum \gamma_{j,k} Q_{j,k}^\square(s,t)]^2 */
+double error_t( double t, void *params) {
+  error_t_p *p = (error_t_p *) params;
+  point st = {.x = p->s, .y = t};
+  point Fst = F( st);
+  point GFst = tri_ref2t( p->p->w, p->p->t, Fst);
 
   double sum = 0.0;
   int j, k, l;
-  for( l = 0; l < p->s->l; l++) {
+  for( l = 0; l < p->p->l; l++) {
     pair_invcantor( &j, &k, l);
-    sum += p->s->coeffs[l] * pkd_eval( j, k, r);
+    sum += p->p->coeffs[l] * pkd_eval_square( j, k, st);
   }
 
-  double err = f(q.x, q.y) - sum;
-  return err*err;
+  double err = f(GFst.x, GFst.y) - sum;
+  return (1-t)*err*err;
 }
 
 /* compute \int_0^{1-x} error_y(x, y) dy */
-double error_x( double x, void *params) {
-  //integrate
-  error_s *p = (error_s *) params;
-  error_y_s p2 = {.s = p, .x = x};
-  return integrate( &error_y, &p2, 0, 1.0-x);
+double error_s( double s, void *params) {
+  error_s_p *p = (error_s_p *) params;
+  error_t_p p2 = {.p = p, .s = s};
+  return integrate( &error_t, &p2, -1, 1);
 }
 
 /* find gamma_{j,k} for j \in \{0, \ldots, n\} and k \in \{0, \ldots, n-j\} */
-void construct_p_n( int n, double *coeffs) {
+void construct_p_n( workspace *w, tri *t, int n, double *coeffs) {
   int j, k, l;
   for( j = 0; j < n; j++) {
     for( k = 0; k < n-j; k++) {
       pair_cantor( j, k, &l);
-      coeffs[l] = error_gamma( j, k);
-      printf("%i %i %g, %g\n", j, k, coeffs[l], pkd_norm( j, k));
+      coeffs[l] = error_gamma( w, t, j, k);
+      //printf("gamma: %i %i %g\n", j, k, coeffs[l]);
     }
   }
 }
 
 /* compute e_n( \node) by computing 
- * \|f - p_n\|^2_{2,\node} = \int_0^1 error_x( x, y) dx. */
-double error( int n) {
+ * \|f - p_n\|^2_{2,\node}
+ */
+double error( workspace *w, tree *node, int n) {
+  assert( n > 0);
   //find polynomial
-  double coeffs[(n+2)*(n+1)/2];
-  construct_p_n( n, coeffs);
+  double *coeffs = malloc((n+1)*n/2 * sizeof( double));
+  construct_p_n( w, w->tris[node->i], n, coeffs);
+
+  if( node->hp) {
+    hptree_set_coeffs( w, node, n, coeffs);
+  } else {
+    node->info.h->coeffs = coeffs;
+  }
 
   //integrate
-  error_s params = { .node = node, .coeffs = coeffs, .l = (n+2)*(n+1)/2};
-  return integrate( &error_x, &params, 0, 1);
+  tri *t = w->tris[node->i];
+  error_s_p params = { .w = w, .t = w->tris[node->i], 
+                       .coeffs = coeffs, .l = (n+1)*n/2};
+  double e = t->vol/4.0*integrate( &error_s, &params, -1, 1);
+  //fprintf( stderr, "error %i\n", n);
+  return e;
 }
 
 /*
-int main() {
-  node = tri_create( a, b, c);
-  double g = error( 5);
+int main( void) {
+  int i;
+  workspace *w = workspace_init();
+  point points[4] = {
+    {.x = 0, .y = 0}, 
+    {.x = 1, .y = 0}, 
+    {.x = 0, .y = 1}, 
+    {.x = 1, .y = 1}
+  };
+
+  for( i = 0; i < 4; i++) {
+    workspace_add_point( w, points[i]);
+  }
+
+  tri *tris[2] = {
+    tri_create( w, 0, 1, 2), 
+    tri_create( w, 3, 2, 1)
+  };
+
+  for( i = 0; i < 2; i++) {
+    workspace_add_tri( w, tris[i]);
+  }
+
+  partition_setup( w);
+
+  double g = error( w, w->tris[w->leaves[0]->i], 5);
 
   //double g = error_gamma( 1, 1);
   printf("%g\n", g);
