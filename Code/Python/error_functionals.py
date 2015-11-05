@@ -71,7 +71,6 @@ class TwoNormOrth( TwoNorm):
     leg = lambda x: self.L(n, ab2m11( a, b, x)) #move
     teller, _ = quad( lambda x: self.f(x) * leg(x), a, b)
     noemer = (b-a)/(2*n+1) #see verslag
-    print "\t", teller/noemer
     return teller/noemer
 
   def bestpoly( self, node, d = 1):
@@ -79,7 +78,6 @@ class TwoNormOrth( TwoNorm):
     leg = []
     for j in range( d):
       leg.append( self.__gamma( node, j))
-    print leg
     legvallambda = lambda x: self.legval( ab2m11( a, b, x), leg)
     return legvallambda, legvallambda
 

@@ -21,6 +21,6 @@ def plottree( tree):
 
 def plotlists( lists, legends, yscale = 'log'):
   for l in lists:
-    plt.plot( l)
+    plt.plot( l[0], l[1])
   plt.legend( legends)
-  plt.yscale( yscale)
+  #plt.yscale( yscale)

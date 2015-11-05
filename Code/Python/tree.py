@@ -117,13 +117,14 @@ class Tree( object):
     return self.getParent().forest
 
   def sum_of_leaves( self):
-    return sum( [node.error() for node in self.leaves()])
+    s = [node.error() for node in self.leaves()]
+    return sum( s)
 
   def error( self, val = False):
     if val != False:
       self.__error = val
 
-    return self.__value
+    return self.__error
 
   def value( self, val = False):
     if val != False:

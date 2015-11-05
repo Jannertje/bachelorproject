@@ -58,11 +58,9 @@ class TreeGrapher( object):
       t+1, 
       n, 
     )
-    if tree.isLeaf():
-      if isinstance( tree, Tree_hp):
-        string = "".join( [string, "\np=%d" % tree.p()])
-      if self.debug:
-        string = "".join( [string, "\ne=%s\n%s" % (tree.error(), pprint.pformat(tree.extra_info(), width=1))])
+    if isinstance( tree, Tree_hp):
+      string = "".join( [string, "\np=%d" % tree.p()])
+    string = "".join( [string, "\ne=%s\n%s" % (tree.error(), pprint.pformat(tree.extra_info(), width=1))])
 
     return string
 

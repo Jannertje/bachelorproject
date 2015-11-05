@@ -20,6 +20,7 @@ class Algo(object):
     self.tree = t( -1., a, b)
 
     self.error_list = []
+    self.dof_list = []
 
   """
   Return the true of this node
@@ -39,10 +40,17 @@ class Algo(object):
     return self.tree.sum_of_leaves()
 
   @abstractmethod
+  def current_dof( self):
+    pass
+
+  @abstractmethod
   def needsSubdivide( self, leaf):
     pass
 
   def plot( self):
+    l = self.tree.leaves()
+    for leaf in l:
+      print leaf.boundary(), leaf.error()
     plotfunc( self.f, *self.tree.boundary())
     plottree( self.tree)
     plt.show()
@@ -64,9 +72,10 @@ class Algo(object):
   def iterate( self, n = False):
     def run():
       bests = self.iteration()
-      self.plot()
+      #self.plot()
       current_error = self.current_error()
       self.error_list.append( current_error)
+      self.dof_list.append( self.current_dof())
       if len(bests) == 0:
         return True
       for leaf in bests:
@@ -91,6 +100,9 @@ class Greedy(Algo):
     from error_functionals import TwoNormOrth
     self.errorClass = TwoNormOrth(self.f)
 
+  def current_dof( self):
+    return self.d * len( self.tree.leaves())
+
   def needsSubdivide( self, leaf):
     return True
 
@@ -106,6 +118,9 @@ class Greedy(Algo):
     return self.value( node, d)
 
 class Binev( Algo):
+  def current_dof( self):
+    return self.d * len( self.tree.leaves())
+
   def needsSubdivide( self, leaf):
     return True
 
@@ -247,15 +262,23 @@ class Binev2013( Binev):
     self.tree = t( -1, a, b)
     self.tree_hp = Tree_1D_hp( -1, a, b)
     self.error_list = []
+    self.dof_list = []
 
     from error_functionals import TwoNormOrth
     self.errorClass = TwoNormOrth( self.f)
 
   def plot( self):
+    l = self.tree_hp.leaves()
+    dof = 0
+    for leaf in l:
+      dof = dof + leaf._p
+      print leaf._p, leaf.boundary(), leaf.error()
+    print dof, self.tree_hp.sum_of_leaves()
     plotfunc( self.f, *self.tree.boundary())
     plottree( self.tree_hp)
     plt.show()
     TreeGrapher( [self.tree_hp], 'tree_hp.pdf', unique = False, debug = True).graph()
+    TreeGrapher( [self.tree], 'tree.pdf', unique = False, debug = True).graph()
 
   def iteration( self):
     sorter = self.s()
@@ -297,6 +320,7 @@ class Binev2013( Binev):
 
     for l in tree.leaves():
       T_hp.node( *l.boundary()).p( self._p( l))
+      T_hp.node( *l.boundary()).error( l.error())
 
     return T_hp
 
@@ -345,6 +369,9 @@ class Binev2013( Binev):
       raise TypeError("Argument invalid!")
       return False
     return self.__etilde( node), {}
+
+  def current_dof( self):
+    return sum( [l._p for l in self.tree_hp.leaves()])
 
   def current_error( self):
     return self.tree_hp.sum_of_leaves()
